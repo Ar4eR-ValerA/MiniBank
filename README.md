@@ -1,2 +1,2 @@
-﻿#MiniBank
-##Author - Shevchenko Valery
+﻿# MiniBank
+## Author - Shevchenko Valery
