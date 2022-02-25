@@ -13,7 +13,7 @@ namespace MiniBank.Web
     public class Startup
     {
         private IConfiguration _configuration;
-        
+
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -25,8 +25,8 @@ namespace MiniBank.Web
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
-            services.AddScoped<IRubleTransferService, RubleTransferService>();
-            services.AddScoped<ICurrencyRateProvider, CurrencyRateProvider>();
+            services.AddScoped<IRubleTransferService, RubleTransferService>(_ =>
+                new RubleTransferService(new CurrencyRateProvider()));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
