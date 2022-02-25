@@ -1,4 +1,4 @@
-﻿namespace MiniBank.Data.Interfaces
+﻿namespace MiniBank.Core.Interfaces
 {
     public interface ICurrencyRateProvider
     {
