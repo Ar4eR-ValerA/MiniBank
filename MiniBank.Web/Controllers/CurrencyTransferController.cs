@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MiniBank.Core.Interfaces;
-using MiniBank.Data.Interfaces;
 
 namespace MiniBank.Web.Controllers
 {
@@ -22,9 +21,7 @@ namespace MiniBank.Web.Controllers
         [HttpGet(Name = "TransferCurrency")]
         public int TransferCurrency([FromQuery] int rubles, string targetCurrencyCode)
         {
-            return _rubleTransferService.TransferRuble(
-                rubles,
-                _currencyRateProvider.GetCurrencyRate(targetCurrencyCode));
+            return _rubleTransferService.TransferRuble(rubles, targetCurrencyCode, _currencyRateProvider);
         }
     }
 }

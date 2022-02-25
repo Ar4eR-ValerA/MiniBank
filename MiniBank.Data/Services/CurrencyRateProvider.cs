@@ -1,5 +1,5 @@
 ﻿using System;
-using MiniBank.Data.Interfaces;
+using MiniBank.Core.Interfaces;
 
 namespace MiniBank.Data.Services
 {

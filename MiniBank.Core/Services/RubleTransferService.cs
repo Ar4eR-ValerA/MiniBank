@@ -5,9 +5,9 @@ namespace MiniBank.Core.Services
 {
     public class RubleTransferService : IRubleTransferService
     {
-        public int TransferRuble(int rubles, int targetCurrencyRate)
+        public int TransferRuble(int rubles, string targetCurrencyCode, ICurrencyRateProvider currencyRateProvider)
         {
-            var result = rubles * targetCurrencyRate;
+            var result = rubles * currencyRateProvider.GetCurrencyRate(targetCurrencyCode);
 
             if (result < 0)
             {

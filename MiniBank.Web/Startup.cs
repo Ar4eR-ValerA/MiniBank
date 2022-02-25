@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MiniBank.Core.Interfaces;
 using MiniBank.Core.Services;
-using MiniBank.Data.Interfaces;
 using MiniBank.Data.Services;
 using MiniBank.Web.Middlewares;
 

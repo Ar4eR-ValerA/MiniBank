@@ -2,6 +2,6 @@
 {
     public interface IRubleTransferService
     {
-        int TransferRuble(int rubles, int targetCurrencyRate);
+        int TransferRuble(int rubles, string targetCurrencyCode, ICurrencyRateProvider currencyRateProvider);
     }
 }
