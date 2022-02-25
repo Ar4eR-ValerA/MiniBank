@@ -33,7 +33,9 @@ namespace MiniBank.Web
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
+
             app.UseMiddleware<ExceptionMiddleware>();
+            app.UseMiddleware<UserFriendlyExceptionMiddleware>();
 
             if (env.IsDevelopment())
             {

@@ -1,5 +1,5 @@
-﻿using System;
-using MiniBank.Core.Interfaces;
+﻿using MiniBank.Core.Interfaces;
+using MiniBank.Core.Tools;
 
 namespace MiniBank.Core.Services
 {
@@ -11,8 +11,7 @@ namespace MiniBank.Core.Services
 
             if (result < 0)
             {
-                // TODO: Сделать раздельные юзер ошибки и внутренние
-                throw new Exception("Result is negative");
+                throw new UserFriendlyException("Result is negative");
             }
 
             return result;
