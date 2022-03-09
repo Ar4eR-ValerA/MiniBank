@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Net;
 using MiniBank.Core.Tools;
 
 namespace MiniBank.Web.Middlewares
@@ -22,7 +20,10 @@ namespace MiniBank.Web.Middlewares
             }
             catch (UserFriendlyException exception)
             {
-                await httpContext.Response.WriteAsJsonAsync(new { exception.Message });
+                await httpContext.Response.WriteAsJsonAsync(new
+                {
+                    StatusCode = HttpStatusCode.BadRequest, exception.Message
+                });
             }
         }
     }

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Net;
 
 namespace MiniBank.Web.Middlewares
 {
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        
+
         public ExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
@@ -21,7 +19,10 @@ namespace MiniBank.Web.Middlewares
             }
             catch (Exception exception)
             {
-                await httpContext.Response.WriteAsJsonAsync(new { Message = "Internal error" });
+                await httpContext.Response.WriteAsJsonAsync(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError
+                });
             }
         }
     }
