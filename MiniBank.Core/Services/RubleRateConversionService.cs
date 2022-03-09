@@ -14,12 +14,12 @@ namespace MiniBank.Core.Services
         
         public int ConvertRubleRate(int rubles, string targetCurrencyCode)
         {
-            var result = rubles * _currencyRateProvider.GetCurrencyRate(targetCurrencyCode);
-
-            if (result < 0)
+            if (rubles < 0)
             {
-                throw new UserFriendlyException("Result is negative");
+                throw new UserFriendlyException("Amount is negative");
             }
+            
+            var result = rubles * _currencyRateProvider.GetCurrencyRate(targetCurrencyCode);
 
             return result;
         }

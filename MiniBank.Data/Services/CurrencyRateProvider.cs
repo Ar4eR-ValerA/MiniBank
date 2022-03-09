@@ -1,5 +1,4 @@
-﻿using System;
-using MiniBank.Core.Interfaces;
+﻿using MiniBank.Core.Interfaces;
 
 namespace MiniBank.Data.Services
 {
@@ -14,7 +13,7 @@ namespace MiniBank.Data.Services
         
         public int GetCurrencyRate(string currencyCode)
         {
-            return _random.Next();
+            return Math.Abs(_random.Next() % 10000);
         }
     }
 }
