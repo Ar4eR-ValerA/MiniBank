@@ -3,16 +3,16 @@ using MiniBank.Core.Tools;
 
 namespace MiniBank.Core.Services
 {
-    public class RubleTransferService : IRubleTransferService
+    public class RubleRateConversionService : IRubleRateConversionService
     {
         private readonly ICurrencyRateProvider _currencyRateProvider;
         
-        public RubleTransferService(ICurrencyRateProvider currencyRateProvider)
+        public RubleRateConversionService(ICurrencyRateProvider currencyRateProvider)
         {
             _currencyRateProvider = currencyRateProvider;
         }
         
-        public int TransferRuble(int rubles, string targetCurrencyCode)
+        public int ConvertRubleRate(int rubles, string targetCurrencyCode)
         {
             var result = rubles * _currencyRateProvider.GetCurrencyRate(targetCurrencyCode);
 
