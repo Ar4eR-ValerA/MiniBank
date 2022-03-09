@@ -13,7 +13,7 @@ namespace MiniBank.Data.Services
         
         public int GetCurrencyRate(string currencyCode)
         {
-            return Math.Abs(_random.Next() % 10000);
+            return _random.Next(0, 10000);
         }
     }
 }
