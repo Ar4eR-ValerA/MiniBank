@@ -2,6 +2,6 @@
 {
     public interface ICurrencyRateConversionService
     {
-        int ConvertCurrencyRate(int amount, string fromCurrencyCode, string toCurrencyCode);
+        double ConvertCurrencyRate(double amount, string fromCurrencyCode, string toCurrencyCode);
     }
 }

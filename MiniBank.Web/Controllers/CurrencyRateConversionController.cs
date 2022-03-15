@@ -15,9 +15,9 @@ namespace MiniBank.Web.Controllers
         }
 
         [HttpGet(Name = "ConvertCurrencyRate")]
-        public int ConvertRubleRate([FromQuery] int amount, string fromCurrencyCode, string targetCurrencyCode)
+        public double ConvertRubleRate([FromQuery] double amount, string fromCurrencyCode, string toCurrencyCode)
         {
-            return _currencyRateConversionService.ConvertCurrencyRate(amount, fromCurrencyCode, targetCurrencyCode);
+            return _currencyRateConversionService.ConvertCurrencyRate(amount, fromCurrencyCode, toCurrencyCode);
         }
     }
 }

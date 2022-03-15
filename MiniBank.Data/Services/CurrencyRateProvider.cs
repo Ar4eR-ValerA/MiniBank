@@ -1,19 +1,47 @@
-﻿using MiniBank.Core.Interfaces;
+﻿using System.Net.Http.Json;
+using System.Text.Json.Nodes;
+using MiniBank.Core.Interfaces;
+using MiniBank.Core.Tools;
+using MiniBank.Data.Models;
 
 namespace MiniBank.Data.Services
 {
     public class CurrencyRateProvider : ICurrencyRateProvider
     {
-        private readonly Random _random;
-        
-        public CurrencyRateProvider()
+        private readonly HttpClient _client;
+
+        public CurrencyRateProvider(HttpClient httpClient)
         {
-            _random = new Random();
+            _client = httpClient;
         }
-        
-        public int GetCurrencyRate(string fromCurrencyCode, string toCurrencyCode)
+
+        public double GetCurrencyRate(string fromCurrencyCode, string toCurrencyCode)
         {
-            return _random.Next(0, 10000);
+            double fromCurrencyRubleRate = GetCurrencyRubleRate(fromCurrencyCode);
+            double toCurrencyRubleRate = GetCurrencyRubleRate(toCurrencyCode);
+
+            return toCurrencyRubleRate / fromCurrencyRubleRate;
+        }
+
+        private double GetCurrencyRubleRate(string currencyCode)
+        {
+            CurrenciesModel? response = _client
+                .GetFromJsonAsync<CurrenciesModel>("")
+                .GetAwaiter()
+                .GetResult();
+
+            if (response is null)
+            {
+                throw new Exception("Can't get response");
+            }
+
+            if (!response.Valute.ContainsKey(currencyCode))
+            {
+                throw new UserFriendlyException($"There is no such currency code: {currencyCode}");
+            }
+            
+            CurrencyModel currency = response.Valute[currencyCode];
+            return currency.Value / currency.Nominal;
         }
     }
 }

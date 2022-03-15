@@ -12,7 +12,7 @@ namespace MiniBank.Core.Services
             _currencyRateProvider = currencyRateProvider;
         }
         
-        public int ConvertCurrencyRate(int amount, string fromCurrencyCode, string toCurrencyCode)
+        public double ConvertCurrencyRate(double amount, string fromCurrencyCode, string toCurrencyCode)
         {
             if (amount < 0)
             {
