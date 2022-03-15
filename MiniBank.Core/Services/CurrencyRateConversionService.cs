@@ -3,23 +3,23 @@ using MiniBank.Core.Tools;
 
 namespace MiniBank.Core.Services
 {
-    public class RubleRateConversionService : IRubleRateConversionService
+    public class CurrencyRateConversionService : ICurrencyRateConversionService
     {
         private readonly ICurrencyRateProvider _currencyRateProvider;
         
-        public RubleRateConversionService(ICurrencyRateProvider currencyRateProvider)
+        public CurrencyRateConversionService(ICurrencyRateProvider currencyRateProvider)
         {
             _currencyRateProvider = currencyRateProvider;
         }
         
-        public int ConvertRubleRate(int rubles, string targetCurrencyCode)
+        public int ConvertCurrencyRate(int amount, string fromCurrencyCode, string toCurrencyCode)
         {
-            if (rubles < 0)
+            if (amount < 0)
             {
                 throw new UserFriendlyException("Amount is negative");
             }
             
-            var result = rubles * _currencyRateProvider.GetCurrencyRate(targetCurrencyCode);
+            var result = amount * _currencyRateProvider.GetCurrencyRate(fromCurrencyCode, toCurrencyCode);
 
             return result;
         }

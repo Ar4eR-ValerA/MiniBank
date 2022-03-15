@@ -26,7 +26,7 @@ namespace MiniBank.Web
             services.AddSwaggerGen();
 
             services.AddScoped<ICurrencyRateProvider, CurrencyRateProvider>();
-            services.AddScoped<IRubleRateConversionService, RubleRateConversionService>();
+            services.AddScoped<ICurrencyRateConversionService, CurrencyRateConversionService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -11,7 +11,7 @@ namespace MiniBank.Data.Services
             _random = new Random();
         }
         
-        public int GetCurrencyRate(string currencyCode)
+        public int GetCurrencyRate(string fromCurrencyCode, string toCurrencyCode)
         {
             return _random.Next(0, 10000);
         }

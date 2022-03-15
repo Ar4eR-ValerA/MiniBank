@@ -2,6 +2,6 @@
 {
     public interface ICurrencyRateProvider
     {
-        int GetCurrencyRate(string currencyCode);
+        int GetCurrencyRate(string fromCurrencyCode, string toCurrencyCode);
     }
 }

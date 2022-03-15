@@ -7,17 +7,17 @@ namespace MiniBank.Web.Controllers
     [Route("[controller]")]
     public class CurrencyRateConversionController : ControllerBase
     {
-        private readonly IRubleRateConversionService _rubleRateConversionService;
+        private readonly ICurrencyRateConversionService _currencyRateConversionService;
 
-        public CurrencyRateConversionController(IRubleRateConversionService rubleRateConversionService)
+        public CurrencyRateConversionController(ICurrencyRateConversionService currencyRateConversionService)
         {
-            _rubleRateConversionService = rubleRateConversionService;
+            _currencyRateConversionService = currencyRateConversionService;
         }
 
-        [HttpGet(Name = "ConvertRubleRate")]
-        public int ConvertRubleRate([FromQuery] int rubles, string targetCurrencyCode)
+        [HttpGet(Name = "ConvertCurrencyRate")]
+        public int ConvertRubleRate([FromQuery] int amount, string fromCurrencyCode, string targetCurrencyCode)
         {
-            return _rubleRateConversionService.ConvertRubleRate(rubles, targetCurrencyCode);
+            return _currencyRateConversionService.ConvertCurrencyRate(amount, fromCurrencyCode, targetCurrencyCode);
         }
     }
 }
