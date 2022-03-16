@@ -3,11 +3,11 @@ using MiniBank.Core.Tools;
 
 namespace MiniBank.Web.Middlewares
 {
-    public class UserFriendlyExceptionMiddleware
+    public class ValidationExceptionMiddleware
     {
         private readonly RequestDelegate _next;
 
-        public UserFriendlyExceptionMiddleware(RequestDelegate next)
+        public ValidationExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
         }

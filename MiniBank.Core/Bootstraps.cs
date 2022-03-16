@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using MiniBank.Core.Interfaces;
 using MiniBank.Core.Services;
+using MiniBank.Core.Services.Interfaces;
 
 namespace MiniBank.Core;
 

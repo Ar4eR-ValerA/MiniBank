@@ -1,8 +1,7 @@
 ﻿using System.Net.Http.Json;
-using System.Text.Json.Nodes;
-using MiniBank.Core.Interfaces;
+using MiniBank.Core.Services.Interfaces;
 using MiniBank.Core.Tools;
-using MiniBank.Data.Models;
+using MiniBank.Data.ResponseModels;
 
 namespace MiniBank.Data.Services
 {

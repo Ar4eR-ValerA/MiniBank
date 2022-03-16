@@ -1,4 +1,4 @@
-﻿namespace MiniBank.Data.Models;
+﻿namespace MiniBank.Data.ResponseModels;
 
 public class CurrenciesModel
 {

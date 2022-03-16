@@ -28,7 +28,7 @@ namespace MiniBank.Web
             app.UseRouting();
 
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<UserFriendlyExceptionMiddleware>();
+            app.UseMiddleware<ValidationExceptionMiddleware>();
 
             if (env.IsDevelopment())
             {

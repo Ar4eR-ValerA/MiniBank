@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MiniBank.Core.Interfaces;
+using MiniBank.Core.Services.Interfaces;
 
 namespace MiniBank.Web.Controllers
 {

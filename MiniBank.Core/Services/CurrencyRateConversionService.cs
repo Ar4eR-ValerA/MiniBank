@@ -1,4 +1,4 @@
-﻿using MiniBank.Core.Interfaces;
+﻿using MiniBank.Core.Services.Interfaces;
 using MiniBank.Core.Tools;
 
 namespace MiniBank.Core.Services
