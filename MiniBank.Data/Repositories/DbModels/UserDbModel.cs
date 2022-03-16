@@ -1,8 +1,8 @@
-﻿namespace MiniBank.Core.Entities;
+﻿namespace MiniBank.Data.Repositories.DbModels;
 
-public class User
+public class UserDbModel
 {
-    public User(Guid id, string login, string email)
+    public UserDbModel(Guid id, string login, string email)
     {
         Id = id;
         Login = login ?? throw new Exception("Login is null");

@@ -2,6 +2,24 @@
 
 public class Account
 {
+    public Account(
+        Guid id, 
+        Guid userId, 
+        double balance, 
+        string currency, 
+        bool isActive, 
+        DateTime dateOpened, 
+        DateTime dateClosed)
+    {
+        Id = id;
+        UserId = userId;
+        Balance = balance;
+        Currency = currency ?? throw new Exception("Currency is null");
+        IsActive = isActive;
+        DateOpened = dateOpened;
+        DateClosed = dateClosed;
+    }
+
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public double Balance { get; set; }
