@@ -37,7 +37,7 @@ namespace MiniBank.Data.Services
 
             if (!response.Valute.ContainsKey(currencyCode))
             {
-                throw new UserFriendlyException($"There is no such currency code: {currencyCode}");
+                throw new ValidationException($"There is no such currency code: {currencyCode}");
             }
             
             CurrencyModel currency = response.Valute[currencyCode];

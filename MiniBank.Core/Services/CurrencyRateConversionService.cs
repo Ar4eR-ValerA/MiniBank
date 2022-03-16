@@ -16,7 +16,7 @@ namespace MiniBank.Core.Services
         {
             if (amount < 0)
             {
-                throw new UserFriendlyException("Amount is negative");
+                throw new ValidationException("Amount is negative");
             }
             
             var result = amount * _currencyRateProvider.GetCurrencyRate(fromCurrencyCode, toCurrencyCode);

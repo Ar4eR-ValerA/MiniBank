@@ -18,7 +18,7 @@ namespace MiniBank.Web.Middlewares
             {
                 await _next(httpContext);
             }
-            catch (UserFriendlyException exception)
+            catch (ValidationException exception)
             {
                 await httpContext.Response.WriteAsJsonAsync(new
                 {
