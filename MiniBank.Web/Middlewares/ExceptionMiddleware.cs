@@ -23,6 +23,8 @@ namespace MiniBank.Web.Middlewares
                 {
                     statusCode = HttpStatusCode.InternalServerError
                 });
+                
+                Console.WriteLine(exception.Message);
             }
         }
     }

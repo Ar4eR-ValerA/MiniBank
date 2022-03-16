@@ -9,6 +9,7 @@ public static class Bootstraps
     public static IServiceCollection AddCore(this IServiceCollection services)
     {
         services.AddScoped<ICurrencyRateConversionService, CurrencyRateConversionService>();
+        services.AddScoped<IUserService, UserService>();
 
         return services;
     }
