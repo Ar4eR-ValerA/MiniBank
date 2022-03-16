@@ -10,6 +10,7 @@ public static class Bootstraps
     {
         services.AddScoped<ICurrencyRateConversionService, CurrencyRateConversionService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAccountService, AccountService>();
 
         return services;
     }
