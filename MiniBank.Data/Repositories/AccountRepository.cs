@@ -32,7 +32,7 @@ public class AccountRepository : IAccountRepository
             accountDbModel.DateClosed);
     }
 
-    public IEnumerable<Account> GetAccounts()
+    public IEnumerable<Account> GetAllAccounts()
     {
         return _accounts.Select(a => new Account(
             a.Id,

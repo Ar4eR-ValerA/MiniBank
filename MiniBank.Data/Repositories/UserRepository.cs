@@ -13,7 +13,7 @@ public class UserRepository : IUserRepository
         _users = new List<UserDbModel>();
     }
 
-    public User GetById(Guid id)
+    public User GetUserById(Guid id)
     {
         var userDbModel = _users.FirstOrDefault(u => u.Id == id);
 
@@ -25,7 +25,7 @@ public class UserRepository : IUserRepository
         return new User(userDbModel.Id, userDbModel.Login, userDbModel.Email);
     }
 
-    public IEnumerable<User> GetAll()
+    public IEnumerable<User> GetAllUsers()
     {
         return _users.Select(u => new User(u.Id, u.Login, u.Email));
     }
