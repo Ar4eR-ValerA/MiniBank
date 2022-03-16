@@ -24,7 +24,7 @@ namespace MiniBank.Data.Services
 
         private double GetCurrencyRubleRate(string currencyCode)
         {
-            CurrenciesModel? response = _client
+            CurrenciesModel response = _client
                 .GetFromJsonAsync<CurrenciesModel>("")
                 .GetAwaiter()
                 .GetResult();

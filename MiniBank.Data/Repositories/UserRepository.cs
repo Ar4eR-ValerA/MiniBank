@@ -18,17 +18,35 @@ public class UserRepository : IUserRepository
             throw new NotFoundException("There is no user with such id");
         }
 
-        return new User(userDbModel.Id, userDbModel.Login, userDbModel.Email, userDbModel.AccountsAmount);
+        return new User
+        {
+            Id = userDbModel.Id,
+            Login = userDbModel.Login,
+            Email = userDbModel.Email,
+            AccountsAmount = userDbModel.AccountsAmount
+        };
     }
 
     public IEnumerable<User> GetAllUsers()
     {
-        return Users.Select(u => new User(u.Id, u.Login, u.Email, u.AccountsAmount));
+        return Users.Select(u => new User
+        {
+            Id = u.Id, 
+            Login = u.Login, 
+            Email = u.Email, 
+            AccountsAmount = u.AccountsAmount
+        });
     }
 
     public Guid CreateUser(User user)
     {
-        var userDbModel = new UserDbModel(Guid.NewGuid(), user.Login, user.Email, user.AccountsAmount);
+        var userDbModel = new UserDbModel
+        {
+            Id = Guid.NewGuid(),
+            Login = user.Login,
+            Email = user.Email,
+            AccountsAmount = user.AccountsAmount
+        };
 
         Users.Add(userDbModel);
 

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MiniBank.Core.Entities.Builders;
+using MiniBank.Core.Entities;
 using MiniBank.Core.Services;
 using MiniBank.Core.Services.Interfaces;
 using MiniBank.Web.Dtos;
@@ -54,12 +54,13 @@ public class AccountController : ControllerBase
     [HttpPost("CreateAccount")]
     public Guid CreateAccount([FromQuery] AccountInfoDto accountInfoDto)
     {
-        var account = new AccountBuilder(
-                accountInfoDto.UserId,
-                accountInfoDto.Balance,
-                accountInfoDto.Currency,
-                accountInfoDto.DateClosed)
-            .Build();
+        var account = new Account
+        {
+            Id = accountInfoDto.UserId,
+            Balance = accountInfoDto.Balance,
+            Currency = accountInfoDto.Currency,
+            DateClosed = accountInfoDto.DateClosed
+        };
 
         return _accountService.CreateAccount(account);
     }
@@ -72,8 +73,8 @@ public class AccountController : ControllerBase
 
     [HttpGet("CalculateCommission")]
     public double CalculateCommission(
-        [FromQuery] double amount, 
-        [FromQuery] Guid fromAccountId, 
+        [FromQuery] double amount,
+        [FromQuery] Guid fromAccountId,
         [FromQuery] Guid toAccountId)
     {
         return _accountService.CalculateCommission(amount, fromAccountId, toAccountId);
@@ -81,8 +82,8 @@ public class AccountController : ControllerBase
 
     [HttpPost("MakeTransaction")]
     public Guid MakeTransaction(
-        [FromQuery] double amount, 
-        [FromQuery] Guid fromAccountId, 
+        [FromQuery] double amount,
+        [FromQuery] Guid fromAccountId,
         [FromQuery] Guid toAccountId)
     {
         return _accountService.MakeTransaction(amount, fromAccountId, toAccountId);

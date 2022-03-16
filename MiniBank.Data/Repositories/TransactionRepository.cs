@@ -18,32 +18,38 @@ public class TransactionRepository : ITransactionRepository
             throw new NotFoundException("There is no transaction with such id");
         }
 
-        return new Transaction(
-            transactionDbModel.Id,
-            transactionDbModel.Amount,
-            transactionDbModel.Currency,
-            transactionDbModel.FromAccountId,
-            transactionDbModel.ToAccountId);
+        return new Transaction
+        {
+            Id = transactionDbModel.Id,
+            Amount = transactionDbModel.Amount,
+            Currency = transactionDbModel.Currency,
+            FromAccountId = transactionDbModel.FromAccountId,
+            ToAccountId = transactionDbModel.ToAccountId
+        };
     }
 
     public IEnumerable<Transaction> GetAllTransactions()
     {
-        return Transactions.Select(t => new Transaction(
-            t.Id,
-            t.Amount,
-            t.Currency,
-            t.FromAccountId,
-            t.ToAccountId));
+        return Transactions.Select(t => new Transaction
+        {
+            Id = t.Id,
+            Amount = t.Amount,
+            Currency = t.Currency,
+            FromAccountId = t.FromAccountId,
+            ToAccountId = t.ToAccountId
+        });
     }
 
     public Guid CreateTransaction(Transaction transaction)
     {
-        var transactionDbModel = new TransactionDbModel(
-            Guid.NewGuid(), 
-            transaction.Amount,
-            transaction.Currency,
-            transaction.FromAccountId,
-            transaction.ToAccountId);
+        var transactionDbModel = new TransactionDbModel
+        {
+            Id = Guid.NewGuid(),
+            Amount = transaction.Amount,
+            Currency = transaction.Currency,
+            FromAccountId = transaction.FromAccountId,
+            ToAccountId = transaction.ToAccountId
+        };
 
         Transactions.Add(transactionDbModel);
 

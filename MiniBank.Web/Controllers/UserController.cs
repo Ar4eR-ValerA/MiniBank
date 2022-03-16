@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MiniBank.Core.Entities;
-using MiniBank.Core.Entities.Builders;
 using MiniBank.Core.Services.Interfaces;
 using MiniBank.Web.Dtos;
 
@@ -48,7 +47,11 @@ public class UserController : ControllerBase
     [HttpPost("CreateUser")]
     public Guid CreateUser([FromQuery] UserInfoDto userInfoDto)
     {
-        var user = new UserBuilder(userInfoDto.Login, userInfoDto.Email).Build();
+        var user = new User
+        {
+            Login = userInfoDto.Login,
+            Email = userInfoDto.Email
+        };
 
         return _userService.CreateUser(user);
     }
@@ -56,7 +59,12 @@ public class UserController : ControllerBase
     [HttpPut("UpdateUser")]
     public void UpdateUser([FromQuery] Guid id, [FromQuery] UserInfoDto userInfoDto)
     {
-        var user = new User(id, userInfoDto.Login, userInfoDto.Email);
+        var user = new User
+        {
+            Id = id, 
+            Login = userInfoDto.Login, 
+            Email = userInfoDto.Email
+        };
 
         _userService.UpdateUser(user);
     }
