@@ -1,37 +1,91 @@
 ﻿using MiniBank.Core.Entities;
 using MiniBank.Core.Repositories;
+using MiniBank.Data.Repositories.DbModels;
 
 namespace MiniBank.Data.Repositories;
 
 public class AccountRepository : IAccountRepository
 {
-    public Account GetById(Guid id)
+    private List<AccountDbModel> _accounts;
+
+    public AccountRepository()
     {
-        throw new NotImplementedException();
+        _accounts = new List<AccountDbModel>();
     }
 
-    public IEnumerable<Account> GetAll()
+    public Account GetAccountById(Guid id)
     {
-        throw new NotImplementedException();
+        var accountDbModel = _accounts.FirstOrDefault(a => a.Id == id);
+
+        if (accountDbModel is null)
+        {
+            throw new Exception("There is no account with such id");
+        }
+
+        return new Account(
+            accountDbModel.Id,
+            accountDbModel.UserId,
+            accountDbModel.Balance,
+            accountDbModel.Currency,
+            accountDbModel.IsActive,
+            accountDbModel.DateOpened,
+            accountDbModel.DateClosed);
+    }
+
+    public IEnumerable<Account> GetAccounts()
+    {
+        return _accounts.Select(a => new Account(
+            a.Id,
+            a.UserId,
+            a.Balance,
+            a.Currency,
+            a.IsActive,
+            a.DateOpened,
+            a.DateClosed));
     }
 
     public Guid CreateAccount(Account account)
     {
-        throw new NotImplementedException();
+        var accountDbModel = new AccountDbModel(
+            Guid.NewGuid(),
+            account.UserId,
+            account.Balance,
+            account.Currency,
+            account.IsActive,
+            account.DateOpened,
+            account.DateClosed);
+
+        _accounts.Add(accountDbModel);
+
+        return accountDbModel.Id;
     }
 
-    public void CloseAccount(Guid id)
+    public void UpdateAccount(Account account)
     {
-        throw new NotImplementedException();
+        var accountDbModel = _accounts.FirstOrDefault(a => a.Id == account.Id);
+
+        if (accountDbModel is null)
+        {
+            throw new Exception("There is no such account");
+        }
+
+        accountDbModel.Balance = account.Balance;
+        accountDbModel.Currency = account.Currency;
+        accountDbModel.DateClosed = account.DateClosed;
+        accountDbModel.DateOpened = account.DateOpened;
+        accountDbModel.IsActive = account.IsActive;
+        accountDbModel.UserId = account.UserId;
     }
 
-    public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
+    public void DeleteAccount(Guid id)
     {
-        throw new NotImplementedException();
-    }
+        var accountDbModel = _accounts.FirstOrDefault(a => a.Id == id);
 
-    public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
-    {
-        throw new NotImplementedException();
+        if (accountDbModel is null)
+        {
+            throw new Exception("There is no such account");
+        }
+
+        _accounts.Remove(accountDbModel);
     }
 }

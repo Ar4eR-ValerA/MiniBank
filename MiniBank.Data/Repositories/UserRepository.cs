@@ -1,6 +1,5 @@
 ﻿using MiniBank.Core.Entities;
 using MiniBank.Core.Repositories;
-using MiniBank.Core.Tools;
 using MiniBank.Data.Repositories.DbModels;
 
 namespace MiniBank.Data.Repositories;
@@ -20,7 +19,7 @@ public class UserRepository : IUserRepository
 
         if (userDbModel is null)
         {
-            throw new ValidationException("There is no user with such id");
+            throw new Exception("There is no user with such id");
         }
 
         return new User(userDbModel.Id, userDbModel.Login, userDbModel.Email);
@@ -46,7 +45,7 @@ public class UserRepository : IUserRepository
 
         if (userDbModel is null)
         {
-            throw new ValidationException("There is no such user");
+            throw new Exception("There is no such user");
         }
 
         userDbModel.Login = user.Login;
@@ -59,7 +58,7 @@ public class UserRepository : IUserRepository
 
         if (userDbModel is null)
         {
-            throw new ValidationException("There is no such user");
+            throw new Exception("There is no such user");
         }
 
         _users.Remove(userDbModel);
