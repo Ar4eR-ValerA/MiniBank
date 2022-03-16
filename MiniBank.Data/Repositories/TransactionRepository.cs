@@ -1,25 +1,21 @@
 ﻿using MiniBank.Core.Entities;
 using MiniBank.Core.Repositories;
+using MiniBank.Core.Tools;
 using MiniBank.Data.Repositories.DbModels;
 
 namespace MiniBank.Data.Repositories;
 
 public class TransactionRepository : ITransactionRepository
 {
-    private List<TransactionDbModel> _transactions;
-
-    public TransactionRepository()
-    {
-        _transactions = new List<TransactionDbModel>();
-    }
+    private static readonly List<TransactionDbModel> Transactions = new();
 
     public Transaction GetTransactionById(Guid id)
     {
-        var transactionDbModel = _transactions.FirstOrDefault(t => t.Id == id);
+        var transactionDbModel = Transactions.FirstOrDefault(t => t.Id == id);
 
         if (transactionDbModel is null)
         {
-            throw new Exception("There is no transaction with such id");
+            throw new NotFoundException("There is no transaction with such id");
         }
 
         return new Transaction(
@@ -32,7 +28,7 @@ public class TransactionRepository : ITransactionRepository
 
     public IEnumerable<Transaction> GetAllTransactions()
     {
-        return _transactions.Select(t => new Transaction(
+        return Transactions.Select(t => new Transaction(
             t.Id,
             t.Amount,
             t.Currency,
@@ -49,18 +45,18 @@ public class TransactionRepository : ITransactionRepository
             transaction.FromAccountId,
             transaction.ToAccountId);
 
-        _transactions.Add(transactionDbModel);
+        Transactions.Add(transactionDbModel);
 
         return transactionDbModel.Id;
     }
 
     public void UpdateTransaction(Transaction transaction)
     {
-        var transactionDbModel = _transactions.FirstOrDefault(t => t.Id == transaction.Id);
+        var transactionDbModel = Transactions.FirstOrDefault(t => t.Id == transaction.Id);
 
         if (transactionDbModel is null)
         {
-            throw new Exception("There is no such transaction");
+            throw new NotFoundException("There is no such transaction");
         }
 
         transactionDbModel.Amount = transaction.Amount;
@@ -71,13 +67,13 @@ public class TransactionRepository : ITransactionRepository
 
     public void DeleteTransaction(Guid id)
     {
-        var transactionDbModel = _transactions.FirstOrDefault(t => t.Id == id);
+        var transactionDbModel = Transactions.FirstOrDefault(t => t.Id == id);
 
         if (transactionDbModel is null)
         {
-            throw new Exception("There is no such transaction");
+            throw new NotFoundException("There is no such transaction");
         }
 
-        _transactions.Remove(transactionDbModel);
+        Transactions.Remove(transactionDbModel);
     }
 }

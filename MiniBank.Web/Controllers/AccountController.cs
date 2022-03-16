@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MiniBank.Core.Entities;
+using MiniBank.Core.Entities.Builders;
 using MiniBank.Core.Services;
 using MiniBank.Core.Services.Interfaces;
 using MiniBank.Web.Dtos;
@@ -22,42 +22,44 @@ public class AccountController : ControllerBase
     {
         var account = _accountService.GetById(id);
 
-        return new AccountDto(
-            account.Id,
-            account.UserId,
-            account.Balance,
-            account.Currency,
-            account.IsActive,
-            account.DateOpened,
-            account.DateClosed);
+        return new AccountDto
+        {
+            Id = account.Id,
+            UserId = account.UserId,
+            Balance = account.Balance,
+            Currency = account.Currency,
+            IsActive = account.IsActive,
+            DateOpened = account.DateOpened,
+            DateClosed = account.DateClosed
+        };
     }
-    
+
     [HttpGet("GetAllAccounts")]
     public IEnumerable<AccountDto> GetAllAccounts()
     {
         var accounts = _accountService.GetAll();
 
-        return accounts.Select(a => new AccountDto(
-            a.Id,
-            a.UserId,
-            a.Balance,
-            a.Currency,
-            a.IsActive,
-            a.DateOpened,
-            a.DateClosed));
+        return accounts.Select(a => new AccountDto
+        {
+            Id = a.Id,
+            UserId = a.UserId,
+            Balance = a.Balance,
+            Currency = a.Currency,
+            IsActive = a.IsActive,
+            DateOpened = a.DateOpened,
+            DateClosed = a.DateClosed
+        });
     }
-    
+
     [HttpPost("CreateAccount")]
-    public Guid CreateAccount(
-        [FromQuery] 
-        Guid userId, 
-        double balance, 
-        string currency, 
-        bool isActive, 
-        DateTime dateOpened, 
-        DateTime dateClosed)
+    public Guid CreateAccount([FromQuery] AccountInfoDto accountInfoDto)
     {
-        var account = new Account(Guid.Empty, userId, balance, currency, isActive, dateOpened, dateClosed);
+        var account = new AccountBuilder(
+                accountInfoDto.UserId,
+                accountInfoDto.Balance,
+                accountInfoDto.Currency,
+                accountInfoDto.DateClosed)
+            .Build();
 
         return _accountService.CreateAccount(account);
     }
@@ -69,13 +71,19 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("CalculateCommission")]
-    public double CalculateCommission([FromQuery] double amount, Guid fromAccountId, Guid toAccountId)
+    public double CalculateCommission(
+        [FromQuery] double amount, 
+        [FromQuery] Guid fromAccountId, 
+        [FromQuery] Guid toAccountId)
     {
         return _accountService.CalculateCommission(amount, fromAccountId, toAccountId);
     }
 
     [HttpPost("MakeTransaction")]
-    public Guid MakeTransaction([FromQuery] double amount, Guid fromAccountId, Guid toAccountId)
+    public Guid MakeTransaction(
+        [FromQuery] double amount, 
+        [FromQuery] Guid fromAccountId, 
+        [FromQuery] Guid toAccountId)
     {
         return _accountService.MakeTransaction(amount, fromAccountId, toAccountId);
     }

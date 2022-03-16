@@ -1,13 +1,11 @@
-﻿using MiniBank.Core.Tools;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace MiniBank.Web.Dtos;
 
-public class UserDto
+public class UserInfoDto
 {
     private string _login = string.Empty;
-    private string _email= string.Empty;
-
-    public Guid Id { get; set; }
+    private string _email = string.Empty;
 
     public string Login
     {
@@ -20,6 +18,4 @@ public class UserDto
         get => _email;
         set => _email = value ?? throw new ValidationException("Email is null");
     }
-
-    public int AccountsAmount { get; set; }
 }

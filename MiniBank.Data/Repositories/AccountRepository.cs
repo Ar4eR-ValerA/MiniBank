@@ -1,25 +1,21 @@
 ﻿using MiniBank.Core.Entities;
 using MiniBank.Core.Repositories;
+using MiniBank.Core.Tools;
 using MiniBank.Data.Repositories.DbModels;
 
 namespace MiniBank.Data.Repositories;
 
 public class AccountRepository : IAccountRepository
 {
-    private List<AccountDbModel> _accounts;
-
-    public AccountRepository()
-    {
-        _accounts = new List<AccountDbModel>();
-    }
+    private static readonly List<AccountDbModel> Accounts = new();
 
     public Account GetAccountById(Guid id)
     {
-        var accountDbModel = _accounts.FirstOrDefault(a => a.Id == id);
+        var accountDbModel = Accounts.FirstOrDefault(a => a.Id == id);
 
         if (accountDbModel is null)
         {
-            throw new Exception("There is no account with such id");
+            throw new NotFoundException("There is no account with such id");
         }
 
         return new Account(
@@ -34,7 +30,7 @@ public class AccountRepository : IAccountRepository
 
     public IEnumerable<Account> GetAllAccounts()
     {
-        return _accounts.Select(a => new Account(
+        return Accounts.Select(a => new Account(
             a.Id,
             a.UserId,
             a.Balance,
@@ -55,18 +51,18 @@ public class AccountRepository : IAccountRepository
             account.DateOpened,
             account.DateClosed);
 
-        _accounts.Add(accountDbModel);
+        Accounts.Add(accountDbModel);
 
         return accountDbModel.Id;
     }
 
     public void UpdateAccount(Account account)
     {
-        var accountDbModel = _accounts.FirstOrDefault(a => a.Id == account.Id);
+        var accountDbModel = Accounts.FirstOrDefault(a => a.Id == account.Id);
 
         if (accountDbModel is null)
         {
-            throw new Exception("There is no such account");
+            throw new NotFoundException("There is no such account");
         }
 
         accountDbModel.Balance = account.Balance;
@@ -79,13 +75,13 @@ public class AccountRepository : IAccountRepository
 
     public void DeleteAccount(Guid id)
     {
-        var accountDbModel = _accounts.FirstOrDefault(a => a.Id == id);
+        var accountDbModel = Accounts.FirstOrDefault(a => a.Id == id);
 
         if (accountDbModel is null)
         {
-            throw new Exception("There is no such account");
+            throw new NotFoundException("There is no such account");
         }
 
-        _accounts.Remove(accountDbModel);
+        Accounts.Remove(accountDbModel);
     }
 }

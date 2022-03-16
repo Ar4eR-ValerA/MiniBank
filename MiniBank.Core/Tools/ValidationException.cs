@@ -1,6 +1,6 @@
 ﻿namespace MiniBank.Core.Tools
 {
-    public class ValidationException : Exception
+    public class ValidationException : UserFriendlyException
     {
         public ValidationException()
         {

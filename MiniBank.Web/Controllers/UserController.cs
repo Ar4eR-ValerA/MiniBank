@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MiniBank.Core.Entities;
+using MiniBank.Core.Entities.Builders;
 using MiniBank.Core.Services.Interfaces;
 using MiniBank.Web.Dtos;
 
@@ -21,33 +22,45 @@ public class UserController : ControllerBase
     {
         var user = _userService.GetById(id);
 
-        return new UserDto(user.Id, user.Login, user.Email);
+        return new UserDto
+        {
+            Id = user.Id,
+            Login = user.Login,
+            Email = user.Email,
+            AccountsAmount = user.AccountsAmount
+        };
     }
-    
+
     [HttpGet("GetAllUsers")]
     public IEnumerable<UserDto> GetAllUsers()
     {
         var users = _userService.GetAll();
 
-        return users.Select(u => new UserDto(u.Id, u.Login, u.Email));
+        return users.Select(u => new UserDto
+        {
+            Id = u.Id,
+            Login = u.Login,
+            Email = u.Email,
+            AccountsAmount = u.AccountsAmount
+        });
     }
 
     [HttpPost("CreateUser")]
-    public Guid CreateUser([FromQuery] string login, string email)
+    public Guid CreateUser([FromQuery] UserInfoDto userInfoDto)
     {
-        var user = new User(Guid.Empty, login, email);
-        
+        var user = new UserBuilder(userInfoDto.Login, userInfoDto.Email).Build();
+
         return _userService.CreateUser(user);
     }
 
     [HttpPut("UpdateUser")]
-    public void UpdateUser([FromQuery] UserDto userDto)
+    public void UpdateUser([FromQuery] Guid id, [FromQuery] UserInfoDto userInfoDto)
     {
-        var user = new User(userDto.Id, userDto.Login, userDto.Email);
-        
+        var user = new User(id, userInfoDto.Login, userInfoDto.Email);
+
         _userService.UpdateUser(user);
     }
-    
+
     [HttpDelete("DeleteUser")]
     public void DeleteUser([FromQuery] Guid id)
     {

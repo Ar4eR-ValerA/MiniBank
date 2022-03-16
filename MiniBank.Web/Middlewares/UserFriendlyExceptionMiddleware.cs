@@ -3,11 +3,11 @@ using MiniBank.Core.Tools;
 
 namespace MiniBank.Web.Middlewares
 {
-    public class ValidationExceptionMiddleware
+    public class UserFriendlyExceptionMiddleware
     {
         private readonly RequestDelegate _next;
 
-        public ValidationExceptionMiddleware(RequestDelegate next)
+        public UserFriendlyExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
         }
@@ -18,7 +18,7 @@ namespace MiniBank.Web.Middlewares
             {
                 await _next(httpContext);
             }
-            catch (ValidationException exception)
+            catch (UserFriendlyException exception)
             {
                 await httpContext.Response.WriteAsJsonAsync(new
                 {
