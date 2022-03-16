@@ -40,6 +40,13 @@ public class TransactionRepository : ITransactionRepository
         });
     }
 
+    public bool Contains(Guid id)
+    {
+        var transaction = Transactions.FirstOrDefault(t => t.Id == id);
+
+        return transaction is not null;
+    }
+
     public Guid CreateTransaction(Transaction transaction)
     {
         var transactionDbModel = new TransactionDbModel

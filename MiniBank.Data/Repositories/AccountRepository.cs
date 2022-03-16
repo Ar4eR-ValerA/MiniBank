@@ -44,6 +44,13 @@ public class AccountRepository : IAccountRepository
         });
     }
 
+    public bool Contains(Guid id)
+    {
+        var account = Accounts.FirstOrDefault(a => a.Id == id);
+
+        return account is not null;
+    }
+
     public Guid CreateAccount(Account account)
     {
         var accountDbModel = new AccountDbModel
@@ -52,8 +59,8 @@ public class AccountRepository : IAccountRepository
             UserId = account.UserId,
             Balance = account.Balance,
             Currency = account.Currency,
-            IsActive = account.IsActive,
-            DateOpened = account.DateOpened,
+            IsActive = true,
+            DateOpened = DateTime.Now,
             DateClosed = account.DateClosed
         };
 

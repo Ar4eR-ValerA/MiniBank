@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace MiniBank.Web.Dtos;
+﻿namespace MiniBank.Web.Dtos;
 
 public class UserInfoDto
 {

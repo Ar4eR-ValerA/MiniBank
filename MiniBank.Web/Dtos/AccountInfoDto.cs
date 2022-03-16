@@ -1,6 +1,4 @@
-﻿using MiniBank.Core.Tools;
-
-namespace MiniBank.Web.Dtos;
+﻿namespace MiniBank.Web.Dtos;
 
 public class AccountInfoDto
 {

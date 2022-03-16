@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MiniBank.Core.Entities;
-using MiniBank.Core.Services;
 using MiniBank.Core.Services.Interfaces;
 using MiniBank.Web.Dtos;
 
@@ -12,9 +11,9 @@ public class AccountController : ControllerBase
 {
     private readonly IAccountService _accountService;
 
-    public AccountController()
+    public AccountController(IAccountService accountService)
     {
-        _accountService = new AccountService();
+        _accountService = accountService;
     }
 
     [HttpGet("GetAccountById")]
@@ -56,7 +55,7 @@ public class AccountController : ControllerBase
     {
         var account = new Account
         {
-            Id = accountInfoDto.UserId,
+            UserId = accountInfoDto.UserId,
             Balance = accountInfoDto.Balance,
             Currency = accountInfoDto.Currency,
             DateClosed = accountInfoDto.DateClosed

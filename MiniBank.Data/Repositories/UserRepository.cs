@@ -38,6 +38,13 @@ public class UserRepository : IUserRepository
         });
     }
 
+    public bool Contains(Guid id)
+    {
+        var user = Users.FirstOrDefault(u => u.Id == id);
+
+        return user is not null;
+    }
+
     public Guid CreateUser(User user)
     {
         var userDbModel = new UserDbModel
@@ -45,7 +52,7 @@ public class UserRepository : IUserRepository
             Id = Guid.NewGuid(),
             Login = user.Login,
             Email = user.Email,
-            AccountsAmount = user.AccountsAmount
+            AccountsAmount = 0
         };
 
         Users.Add(userDbModel);
