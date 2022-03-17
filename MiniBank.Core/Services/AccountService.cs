@@ -9,11 +9,16 @@ public class AccountService : IAccountService
 {
     private readonly IAccountRepository _accountRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ICurrencyRateConversionService _currencyRateConversionService;
 
-    public AccountService(IAccountRepository accountRepository, IUserRepository userRepository)
+    public AccountService(
+        IAccountRepository accountRepository,
+        IUserRepository userRepository,
+        ICurrencyRateConversionService currencyRateConversionService)
     {
         _accountRepository = accountRepository;
         _userRepository = userRepository;
+        _currencyRateConversionService = currencyRateConversionService;
     }
 
     public Account GetById(Guid id)
@@ -57,17 +62,64 @@ public class AccountService : IAccountService
 
         account.IsActive = false;
         account.DateClosed = DateTime.Now;
-        
+
         _accountRepository.UpdateAccount(account);
     }
 
     public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
     {
-        throw new NotImplementedException();
+        var fromAccount = _accountRepository.GetAccountById(fromAccountId);
+        var toAccount = _accountRepository.GetAccountById(toAccountId);
+
+        if (fromAccount.UserId == toAccount.UserId)
+        {
+            return 0;
+        }
+
+        double commission = Math.Round(amount * 0.02, 2);
+
+        return commission;
     }
 
     public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
     {
-        throw new NotImplementedException();
+        if (amount <= 0)
+        {
+            throw new ValidationException("Amount must be positive");
+        }
+
+        if (fromAccountId == toAccountId)
+        {
+            throw new ValidationException("Accounts must be different");
+        }
+
+        var fromAccount = _accountRepository.GetAccountById(fromAccountId);
+        var toAccount = _accountRepository.GetAccountById(toAccountId);
+
+        if (!fromAccount.IsActive)
+        {
+            throw new ValidationException("Sender account is not active");
+        }
+
+        if (!toAccount.IsActive)
+        {
+            throw new ValidationException("Receiver account is not active");
+        }
+
+        double commission = CalculateCommission(amount, fromAccountId, toAccountId);
+
+        // TODO: Переделать, чтобы смотрелось нормально
+        
+        fromAccount.Balance -= amount - commission;
+        toAccount.Balance += _currencyRateConversionService.ConvertCurrencyRate(
+                amount - commission, 
+                fromAccount.Currency,
+                toAccount.Currency);
+        
+        _accountRepository.UpdateAccount(fromAccount);
+        _accountRepository.UpdateAccount(toAccount);
+        
+        // TODO: Создавать транзакцию через репозиторий транзакций
+        return Guid.Empty;
     }
 }

@@ -9,4 +9,6 @@ public class Account
     public bool IsActive { get; set; }
     public DateTime DateOpened { get; set; }
     public DateTime DateClosed { get; set; }
+    
+    // TODO: Сделать проверки "Если IsActive = false - ничего изменить нельзя"
 }

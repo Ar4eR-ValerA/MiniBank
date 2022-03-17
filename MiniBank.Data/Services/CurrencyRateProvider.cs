@@ -39,6 +39,8 @@ namespace MiniBank.Data.Services
                 throw new ValidationException($"There is no such currency code: {currencyCode}");
             }
             
+            // TODO: Если рубль - вернуть 1.
+            
             CurrencyModel currency = response.Valute[currencyCode];
             return currency.Value / currency.Nominal;
         }
