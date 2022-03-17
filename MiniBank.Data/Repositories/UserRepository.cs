@@ -9,40 +9,26 @@ public class UserRepository : IUserRepository
 {
     private static readonly List<UserDbModel> Users = new();
 
+    private UserDbModel GetUserDbModelById(Guid id)
+    {
+        return Users.FirstOrDefault(u => u.Id == id);
+    }
+    
     public User GetUserById(Guid id)
     {
-        var userDbModel = Users.FirstOrDefault(u => u.Id == id);
+        var userDbModel = GetUserDbModelById(id);
 
         if (userDbModel is null)
         {
             throw new NotFoundException("There is no user with such id");
         }
 
-        return new User
-        {
-            Id = userDbModel.Id,
-            Login = userDbModel.Login,
-            Email = userDbModel.Email,
-            AccountsAmount = userDbModel.AccountsAmount
-        };
+        return new User(userDbModel.Id, userDbModel.Login, userDbModel.Email, userDbModel.AccountsAmount);
     }
 
     public IEnumerable<User> GetAllUsers()
     {
-        return Users.Select(u => new User
-        {
-            Id = u.Id, 
-            Login = u.Login, 
-            Email = u.Email, 
-            AccountsAmount = u.AccountsAmount
-        });
-    }
-
-    public bool Contains(Guid id)
-    {
-        var user = Users.FirstOrDefault(u => u.Id == id);
-
-        return user is not null;
+        return Users.Select(u => new User(u.Id, u.Login, u.Email, u.AccountsAmount));
     }
 
     public Guid CreateUser(User user)
@@ -62,7 +48,7 @@ public class UserRepository : IUserRepository
 
     public void UpdateUser(User user)
     {
-        var userDbModel = Users.FirstOrDefault(u => u.Id == user.Id);
+        var userDbModel = GetUserDbModelById(user.Id);
 
         if (userDbModel is null)
         {
@@ -71,11 +57,12 @@ public class UserRepository : IUserRepository
 
         userDbModel.Login = user.Login;
         userDbModel.Email = user.Email;
+        userDbModel.AccountsAmount = user.AccountsAmount;
     }
 
     public void DeleteUser(Guid id)
     {
-        var userDbModel = Users.FirstOrDefault(u => u.Id == id);
+        var userDbModel = GetUserDbModelById(id);
 
         if (userDbModel is null)
         {

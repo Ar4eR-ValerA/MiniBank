@@ -4,52 +4,39 @@ namespace MiniBank.Core.Entities;
 
 public class Transaction
 {
-    private readonly Guid _fromAccountId;
-    private readonly Guid _toAccountId;
-    private readonly double _amount;
-    public Guid Id { get; init; }
-
-    public double Amount
+    public Transaction(double amount, string currency, Guid fromAccountId, Guid toAccountId)
     {
-        get => _amount;
-        init
-        {
-            if (_amount <= 0)
-            {
-                throw new ValidationException("Transaction amount must be positive");
-            }
+        Id = Guid.NewGuid();
 
-            _amount = value;
+        if (amount <= 0)
+        {
+            throw new ValidationException("Transaction amount must be positive");
         }
+
+        Amount = amount;
+        Currency = currency;
+
+        if (fromAccountId == toAccountId)
+        {
+            throw new ValidationException("Accounts must be different");
+        }
+
+        FromAccountId = fromAccountId;
+        ToAccountId = toAccountId;
     }
 
-    public string Currency { get; init; }
-
-    public Guid FromAccountId
+    public Transaction(Guid id, double amount, string currency, Guid fromAccountId, Guid toAccountId)
     {
-        get => _fromAccountId;
-        init
-        {
-            if (value == ToAccountId)
-            {
-                throw new ValidationException("Accounts must be different");
-            }
-
-            _fromAccountId = value;
-        }
+        Id = id;
+        Amount = amount;
+        Currency = currency;
+        FromAccountId = fromAccountId;
+        ToAccountId = toAccountId;
     }
 
-    public Guid ToAccountId
-    {
-        get => _toAccountId;
-        init
-        {
-            if (value == FromAccountId)
-            {
-                throw new ValidationException("Accounts must be different");
-            }
-
-            _toAccountId = value;
-        }
-    }
+    public Guid Id { get; }
+    public double Amount { get; }
+    public string Currency { get; }
+    public Guid FromAccountId { get; }
+    public Guid ToAccountId { get; }
 }

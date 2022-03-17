@@ -38,7 +38,7 @@ public class AccountService : IAccountService
     {
         var user = _userRepository.GetUserById(account.UserId);
 
-        user.IncrementAccountsAmount();
+        user.IncreaseAccountsAmount();
         _userRepository.UpdateUser(user);
 
         return _accountRepository.CreateAccount(account);
@@ -48,14 +48,9 @@ public class AccountService : IAccountService
     {
         var account = _accountRepository.GetAccountById(id);
 
-        if (!account.IsActive)
-        {
-            throw new ValidationException("Account is already closed");
-        }
-        
-        account.DisableAccount(DateTime.Now);
+        account.DisableAccount();
         var user = _userRepository.GetUserById(account.UserId);
-        user.DecrementAccountsAmount();
+        user.DecreaseAccountsAmount();
 
         _userRepository.UpdateUser(user);
         _accountRepository.UpdateAccount(account);
@@ -67,7 +62,7 @@ public class AccountService : IAccountService
         {
             throw new ValidationException("Amount must be positive");
         }
-        
+
         var fromAccount = _accountRepository.GetAccountById(fromAccountId);
         var toAccount = _accountRepository.GetAccountById(toAccountId);
 
@@ -83,9 +78,6 @@ public class AccountService : IAccountService
 
     public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
     {
-        // TODO: мб убрать эти проверки и просто сделать у транзакции проверку на то, что сумма не 0, и id разные?
-        // TODO: мб убрать проверки из сущностей и вернуть их в сервис? ‾\_(o.o)_/‾
-        // TODO: мб выкидывать в сущностях обычные эксепшены, а в сервисе их ловить и выкидывать user-friendly
         var fromAccount = _accountRepository.GetAccountById(fromAccountId);
         var toAccount = _accountRepository.GetAccountById(toAccountId);
 
@@ -102,13 +94,7 @@ public class AccountService : IAccountService
         _accountRepository.UpdateAccount(fromAccount);
         _accountRepository.UpdateAccount(toAccount);
 
-        var transaction = new Transaction
-        {
-            Amount = finalAmount,
-            Currency = fromAccount.Currency,
-            FromAccountId = fromAccountId,
-            ToAccountId = toAccountId
-        };
+        var transaction = new Transaction(finalAmount, fromAccount.Currency, fromAccountId, toAccountId);
         return _transactionRepository.CreateTransaction(transaction);
     }
 }

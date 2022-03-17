@@ -5,12 +5,50 @@ namespace MiniBank.Core.Entities;
 public class Account
 {
     private double _balance;
-    private bool _isActive;
-    private DateTime _dateClosed;
-    private readonly string _currency;
 
-    public Guid Id { get; init; }
-    public Guid UserId { get; init; }
+    public Account(Guid userId, double balance, string currency, DateTime dateClosed)
+    {
+        Id = Guid.NewGuid();
+        UserId = userId;
+        _balance = balance;
+
+        if (currency is not ("RUB" or "EUR" or "USD"))
+        {
+            throw new ValidationException("Currency of account must be RUB, EUR or USD");
+        }
+
+        Currency = currency;
+        IsActive = true;
+        DateOpened = DateTime.Now;
+
+        if (dateClosed < DateOpened)
+        {
+            throw new ValidationException("Date of account closing must be after opening day");
+        }
+
+        DateClosed = dateClosed;
+    }
+
+    public Account(
+        Guid id,
+        Guid userId,
+        double balance,
+        string currency,
+        bool isActive,
+        DateTime dateOpened,
+        DateTime dateClosed)
+    {
+        Id = id;
+        UserId = userId;
+        _balance = balance;
+        Currency = currency;
+        IsActive = isActive;
+        DateOpened = dateOpened;
+        DateClosed = dateClosed;
+    }
+
+    public Guid Id { get; }
+    public Guid UserId { get; }
 
     public double Balance
     {
@@ -22,54 +60,33 @@ public class Account
                 throw new ValidationException($"Account {Id} is closed");
             }
 
-            if (_balance - value < 0)
+            if (value < 0)
             {
-                throw new ValidationException("After operation balance will be negative");
+                throw new ValidationException("Balance will be negative after operation");
             }
 
             _balance = value;
         }
     }
 
-    public string Currency
+    public string Currency { get; }
+    public bool IsActive { get; private set; }
+    public DateTime DateOpened { get; }
+    public DateTime DateClosed { get; private set; }
+
+    public void DisableAccount()
     {
-        get => _currency;
-        init
+        if (!IsActive)
         {
-            if (value is not ("RUB" or "EUR" or "USD"))
-            {
-                throw new ValidationException("Currency of account must be RUB, EUR or USD");
-            }
-
-            _currency = value;
+            throw new ValidationException("Account is already closed");
         }
-    }
-
-    public bool IsActive
-    {
-        get => _isActive;
-        init
+        
+        if (_balance != 0)
         {
-            if (value == false && _balance != 0)
-            {
-                throw new ValidationException("You can't close account with no zero balance");
-            }
-
-            _isActive = value;
+            throw new ValidationException("You can't close account with no zero balance");
         }
-    }
 
-    public DateTime DateOpened { get; init; }
-
-    public DateTime DateClosed
-    {
-        get => _dateClosed;
-        init => _dateClosed = value;
-    }
-
-    public void DisableAccount(DateTime dateClosed)
-    {
-        _isActive = false;
-        _dateClosed = dateClosed;
+        IsActive = false;
+        DateClosed = DateTime.Now;
     }
 }

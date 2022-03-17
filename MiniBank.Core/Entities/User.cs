@@ -2,36 +2,39 @@
 
 public class User
 {
-    private int _accountsAmount;
-    public Guid Id { get; init; }
+    public User(string login, string email)
+    {
+        Id = Guid.NewGuid();
+        Login = login;
+        Email = email;
+        AccountsAmount = 0;
+    }
+
+    public User(Guid id, string login, string email, int accountsAmount)
+    {
+        Id = id;
+        Login = login;
+        Email = email;
+        AccountsAmount = accountsAmount;
+    }
+
+    public Guid Id { get; }
     public string Login { get; set; }
     public string Email { get; set; }
+    public int AccountsAmount { get; private set; }
 
-    public int AccountsAmount
+    public void IncreaseAccountsAmount()
     {
-        get => _accountsAmount;
-        init
-        {
-            if (value < 0)
-            {
-                throw new Exception("Accounts amount can't be negative");
-            }
-            _accountsAmount = value;
-        }
+        AccountsAmount++;
     }
 
-    public void IncrementAccountsAmount()
+    public void DecreaseAccountsAmount()
     {
-        _accountsAmount++;
-    }
-    
-    public void DecrementAccountsAmount()
-    {
-        if (_accountsAmount == 0)
+        if (AccountsAmount == 0)
         {
             throw new Exception("Accounts amount can't be negative");
         }
-        
-        _accountsAmount--;
+
+        AccountsAmount--;
     }
 }

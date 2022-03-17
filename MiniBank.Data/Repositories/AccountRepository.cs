@@ -9,46 +9,39 @@ public class AccountRepository : IAccountRepository
 {
     private static readonly List<AccountDbModel> Accounts = new();
 
+    private AccountDbModel GetAccountDbModelById(Guid id)
+    {
+        return Accounts.FirstOrDefault(a => a.Id == id);
+    }
+    
     public Account GetAccountById(Guid id)
     {
-        var accountDbModel = Accounts.FirstOrDefault(a => a.Id == id);
+        var accountDbModel = GetAccountDbModelById(id);
 
         if (accountDbModel is null)
         {
             throw new NotFoundException("There is no account with such id");
         }
 
-        return new Account
-        {
-            Id = accountDbModel.Id,
-            UserId = accountDbModel.UserId,
-            Balance = accountDbModel.Balance,
-            Currency = accountDbModel.Currency,
-            IsActive = accountDbModel.IsActive,
-            DateOpened = accountDbModel.DateOpened,
-            DateClosed = accountDbModel.DateClosed
-        };
+        return new Account(accountDbModel.Id,
+            accountDbModel.UserId,
+            accountDbModel.Balance,
+            accountDbModel.Currency,
+            accountDbModel.IsActive,
+            accountDbModel.DateOpened,
+            accountDbModel.DateClosed);
     }
 
     public IEnumerable<Account> GetAllAccounts()
     {
-        return Accounts.Select(a => new Account
-        {
-            Id = a.Id,
-            UserId = a.UserId,
-            Balance = a.Balance,
-            Currency = a.Currency,
-            IsActive = a.IsActive,
-            DateOpened = a.DateOpened,
-            DateClosed = a.DateClosed
-        });
-    }
-
-    public bool Contains(Guid id)
-    {
-        var account = Accounts.FirstOrDefault(a => a.Id == id);
-
-        return account is not null;
+        return Accounts.Select(a => new Account(
+            a.Id,
+            a.UserId,
+            a.Balance,
+            a.Currency,
+            a.IsActive,
+            a.DateOpened,
+            a.DateClosed));
     }
 
     public Guid CreateAccount(Account account)
@@ -71,7 +64,7 @@ public class AccountRepository : IAccountRepository
 
     public void UpdateAccount(Account account)
     {
-        var accountDbModel = Accounts.FirstOrDefault(a => a.Id == account.Id);
+        var accountDbModel = GetAccountDbModelById(account.Id);
 
         if (accountDbModel is null)
         {
@@ -88,7 +81,7 @@ public class AccountRepository : IAccountRepository
 
     public void DeleteAccount(Guid id)
     {
-        var accountDbModel = Accounts.FirstOrDefault(a => a.Id == id);
+        var accountDbModel = GetAccountDbModelById(id);
 
         if (accountDbModel is null)
         {
