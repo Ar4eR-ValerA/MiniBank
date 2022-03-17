@@ -38,11 +38,6 @@ public class AccountService : IAccountService
     {
         var user = _userRepository.GetUserById(account.UserId);
 
-        if (account.Currency is not ("RUB" or "EUR" or "USD"))
-        {
-            throw new ValidationException("You can use only RUB, EUR or USD");
-        }
-        
         user.IncrementAccountsAmount();
         _userRepository.UpdateUser(user);
 
@@ -55,14 +50,9 @@ public class AccountService : IAccountService
 
         if (!account.IsActive)
         {
-            throw new ValidationException("Account already closed");
+            throw new ValidationException("Account is already closed");
         }
-
-        if (account.Balance != 0)
-        {
-            throw new ValidationException("You can't close account with no zero balance");
-        }
-
+        
         account.DisableAccount(DateTime.Now);
         var user = _userRepository.GetUserById(account.UserId);
         user.DecrementAccountsAmount();
@@ -96,16 +86,6 @@ public class AccountService : IAccountService
         // TODO: мб убрать эти проверки и просто сделать у транзакции проверку на то, что сумма не 0, и id разные?
         // TODO: мб убрать проверки из сущностей и вернуть их в сервис? ‾\_(o.o)_/‾
         // TODO: мб выкидывать в сущностях обычные эксепшены, а в сервисе их ловить и выкидывать user-friendly
-        if (amount <= 0)
-        {
-            throw new ValidationException("Amount must be positive");
-        }
-        
-        if (fromAccountId == toAccountId)
-        {
-            throw new ValidationException("Accounts must be different");
-        }
-
         var fromAccount = _accountRepository.GetAccountById(fromAccountId);
         var toAccount = _accountRepository.GetAccountById(toAccountId);
 

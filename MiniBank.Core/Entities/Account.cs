@@ -7,6 +7,7 @@ public class Account
     private double _balance;
     private bool _isActive;
     private DateTime _dateClosed;
+    private readonly string _currency;
 
     public Guid Id { get; init; }
     public Guid UserId { get; init; }
@@ -30,12 +31,32 @@ public class Account
         }
     }
 
-    public string Currency { get; init; }
+    public string Currency
+    {
+        get => _currency;
+        init
+        {
+            if (value is not ("RUB" or "EUR" or "USD"))
+            {
+                throw new ValidationException("Currency of account must be RUB, EUR or USD");
+            }
+
+            _currency = value;
+        }
+    }
 
     public bool IsActive
     {
         get => _isActive;
-        init => _isActive = value;
+        init
+        {
+            if (value == false && _balance != 0)
+            {
+                throw new ValidationException("You can't close account with no zero balance");
+            }
+
+            _isActive = value;
+        }
     }
 
     public DateTime DateOpened { get; init; }
