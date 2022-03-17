@@ -2,9 +2,9 @@
 
 public class Transaction
 {
-    public Guid Id { get; set; }
-    public double Amount { get; set; }
-    public string Currency { get; set; }
-    public Guid FromAccountId { get; set; }
-    public Guid ToAccountId { get; set; }
+    public Guid Id { get; init; }
+    public double Amount { get; init; }
+    public string Currency { get; init; }
+    public Guid FromAccountId { get; init; }
+    public Guid ToAccountId { get; init; }
 }

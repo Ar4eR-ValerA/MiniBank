@@ -19,7 +19,7 @@ namespace MiniBank.Data.Services
             double fromCurrencyRubleRate = GetCurrencyRubleRate(fromCurrencyCode);
             double toCurrencyRubleRate = GetCurrencyRubleRate(toCurrencyCode);
 
-            return toCurrencyRubleRate / fromCurrencyRubleRate;
+            return fromCurrencyRubleRate / toCurrencyRubleRate;
         }
 
         private double GetCurrencyRubleRate(string currencyCode)
@@ -34,13 +34,16 @@ namespace MiniBank.Data.Services
                 throw new Exception("Can't get response");
             }
 
+            if (currencyCode == "RUB")
+            {
+                return 1;
+            }
+            
             if (!response.Valute.ContainsKey(currencyCode))
             {
                 throw new ValidationException($"There is no such currency code: {currencyCode}");
             }
-            
-            // TODO: Если рубль - вернуть 1.
-            
+
             CurrencyModel currency = response.Valute[currencyCode];
             return currency.Value / currency.Nominal;
         }
