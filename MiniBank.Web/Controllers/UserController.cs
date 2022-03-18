@@ -17,7 +17,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("GetById")]
-    public UserDto GetById([FromQuery] Guid id)
+    public UserDto GetById(Guid id)
     {
         var user = _userService.GetById(id);
 
@@ -68,7 +68,7 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete("Delete")]
-    public void Delete([FromQuery] Guid id)
+    public void Delete(Guid id)
     {
         _userService.Delete(id);
     }

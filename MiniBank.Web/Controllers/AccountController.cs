@@ -17,7 +17,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("GetById")]
-    public AccountDto GetById([FromQuery] Guid id)
+    public AccountDto GetById(Guid id)
     {
         var account = _accountService.GetById(id);
 
@@ -70,19 +70,13 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("CalculateCommission")]
-    public double CalculateCommission(
-        [FromQuery] double amount,
-        [FromQuery] Guid fromAccountId,
-        [FromQuery] Guid toAccountId)
+    public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
     {
         return _accountService.CalculateCommission(amount, fromAccountId, toAccountId);
     }
 
     [HttpPost("MakeTransaction")]
-    public Guid MakeTransaction(
-        [FromQuery] double amount,
-        [FromQuery] Guid fromAccountId,
-        [FromQuery] Guid toAccountId)
+    public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
     {
         return _accountService.MakeTransaction(amount, fromAccountId, toAccountId);
     }
