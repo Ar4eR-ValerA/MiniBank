@@ -43,12 +43,12 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("Create")]
-    public Guid Create([FromQuery] UserInfoDto userInfoDto)
+    public Guid Create([FromQuery] UserCreateDto userCreateDto)
     {
         var user = new User
         {
-            Login = userInfoDto.Login,
-            Email = userInfoDto.Email
+            Login = userCreateDto.Login,
+            Email = userCreateDto.Email
         };
 
         return _userService.Create(user);
