@@ -56,8 +56,7 @@ public class AccountController : ControllerBase
         var account = new Account(
             accountInfoDto.UserId,
             accountInfoDto.Balance,
-            accountInfoDto.Currency,
-            accountInfoDto.DateClosed);
+            accountInfoDto.Currency);
 
         return _accountService.CreateAccount(account);
     }

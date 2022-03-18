@@ -6,7 +6,7 @@ public class Account
 {
     private double _balance;
 
-    public Account(Guid userId, double balance, string currency, DateTime dateClosed)
+    public Account(Guid userId, double balance, string currency)
     {
         Id = Guid.NewGuid();
         UserId = userId;
@@ -20,13 +20,6 @@ public class Account
         Currency = currency;
         IsActive = true;
         DateOpened = DateTime.Now;
-
-        if (dateClosed < DateOpened)
-        {
-            throw new ValidationException("Date of account closing must be after opening day");
-        }
-
-        DateClosed = dateClosed;
     }
 
     public Account(
@@ -36,7 +29,7 @@ public class Account
         string currency,
         bool isActive,
         DateTime dateOpened,
-        DateTime dateClosed)
+        DateTime? dateClosed)
     {
         Id = id;
         UserId = userId;
@@ -72,7 +65,7 @@ public class Account
     public string Currency { get; }
     public bool IsActive { get; private set; }
     public DateTime DateOpened { get; }
-    public DateTime DateClosed { get; private set; }
+    public DateTime? DateClosed { get; private set; }
 
     public void DisableAccount()
     {

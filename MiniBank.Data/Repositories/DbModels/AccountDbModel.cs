@@ -8,5 +8,5 @@ public class AccountDbModel
     public string Currency { get; set; }
     public bool IsActive { get; set; }
     public DateTime DateOpened { get; set; }
-    public DateTime DateClosed { get; set; }
+    public DateTime? DateClosed { get; set; }
 }
