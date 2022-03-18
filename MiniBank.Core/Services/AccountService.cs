@@ -24,6 +24,34 @@ public class AccountService : IAccountService
         _currencyRateConversionService = currencyRateConversionService;
     }
 
+    private void ThrowIfTransactionInvalid(double amount, Account fromAccount, Account toAccount)
+    {
+        if (fromAccount.Id == toAccount.Id)
+        {
+            throw new ValidationException("Accounts must be different");
+        }
+
+        if (amount < 0)
+        {
+            throw new ValidationException("Transaction amount must be positive");
+        }
+        
+        if (!fromAccount.IsActive)
+        {
+            throw new ValidationException("Sender is not active");
+        }
+        
+        if (!toAccount.IsActive)
+        {
+            throw new ValidationException("Receiver is not active");
+        }
+
+        if (fromAccount.Balance - amount < 0)
+        {
+            throw new ValidationException("Balance will be negative after operation");
+        }
+    }
+    
     public Account GetById(Guid id)
     {
         return _accountRepository.GetAccountById(id);
@@ -37,6 +65,20 @@ public class AccountService : IAccountService
     public Guid CreateAccount(Account account)
     {
         _userRepository.GetUserById(account.UserId);
+        
+        if (account.Currency is not ("RUB" or "EUR" or "USD"))
+        {
+            throw new ValidationException("Currency of account must be RUB, EUR or USD");
+        }
+
+        if (account.Balance < 0)
+        {
+            throw new ValidationException("Balance of account can't be negative");
+        }
+        
+        account.Id = Guid.NewGuid();
+        account.DateOpened = DateTime.Now;
+        account.IsActive = true;
 
         return _accountRepository.CreateAccount(account);
     }
@@ -44,8 +86,20 @@ public class AccountService : IAccountService
     public void CloseAccount(Guid id)
     {
         var account = _accountRepository.GetAccountById(id);
-        account.DisableAccount();
         
+        if (!account.IsActive)
+        {
+            throw new ValidationException("Account is already closed");
+        }
+
+        if (account.Balance != 0)
+        {
+            throw new ValidationException("You can't close account with no zero balance");
+        }
+
+        account.IsActive = false;
+        account.DateClosed = DateTime.Now;
+
         _accountRepository.UpdateAccount(account);
     }
 
@@ -74,20 +128,30 @@ public class AccountService : IAccountService
         var fromAccount = _accountRepository.GetAccountById(fromAccountId);
         var toAccount = _accountRepository.GetAccountById(toAccountId);
 
+        ThrowIfTransactionInvalid(amount, fromAccount, toAccount);
+
         double commission = CalculateCommission(amount, fromAccountId, toAccountId);
-        double finalAmount = amount - commission;
-        double convertedFinalAmount = _currencyRateConversionService.ConvertCurrencyRate(
-            finalAmount,
+        double transactionAmount = amount - commission;
+        double convertedTransactionAmount = _currencyRateConversionService.ConvertCurrencyRate(
+            transactionAmount,
             fromAccount.Currency,
             toAccount.Currency);
 
         fromAccount.Balance -= amount;
-        toAccount.Balance += convertedFinalAmount;
+        toAccount.Balance += convertedTransactionAmount;
 
         _accountRepository.UpdateAccount(fromAccount);
         _accountRepository.UpdateAccount(toAccount);
 
-        var transaction = new Transaction(finalAmount, commission, fromAccount.Currency, fromAccountId, toAccountId);
+        var transaction = new Transaction
+        {
+            Id = Guid.NewGuid(),
+            Amount = transactionAmount,
+            Commission = commission,
+            Currency = fromAccount.Currency,
+            FromAccountId = fromAccountId,
+            ToAccountId = toAccountId
+        };
         return _transactionRepository.CreateTransaction(transaction);
     }
 }

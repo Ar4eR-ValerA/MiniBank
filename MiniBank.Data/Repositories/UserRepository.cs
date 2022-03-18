@@ -13,7 +13,7 @@ public class UserRepository : IUserRepository
     {
         return Users.FirstOrDefault(u => u.Id == id);
     }
-    
+
     public User GetUserById(Guid id)
     {
         var userDbModel = GetUserDbModelById(id);
@@ -23,12 +23,22 @@ public class UserRepository : IUserRepository
             throw new NotFoundException("There is no user with such id");
         }
 
-        return new User(userDbModel.Id, userDbModel.Login, userDbModel.Email);
+        return new User
+        {
+            Id = userDbModel.Id,
+            Login = userDbModel.Login,
+            Email = userDbModel.Email
+        };
     }
 
     public IEnumerable<User> GetAllUsers()
     {
-        return Users.Select(u => new User(u.Id, u.Login, u.Email));
+        return Users.Select(u => new User
+        {
+            Id = u.Id,
+            Login = u.Login, 
+            Email = u.Email
+        });
     }
 
     public Guid CreateUser(User user)

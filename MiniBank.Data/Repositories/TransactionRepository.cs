@@ -13,7 +13,7 @@ public class TransactionRepository : ITransactionRepository
     {
         return Transactions.FirstOrDefault(t => t.Id == id);
     }
-    
+
     public Transaction GetTransactionById(Guid id)
     {
         var transactionDbModel = GetTransactionDbModelById(id);
@@ -23,24 +23,28 @@ public class TransactionRepository : ITransactionRepository
             throw new NotFoundException("There is no transaction with such id");
         }
 
-        return new Transaction(
-            transactionDbModel.Id,
-            transactionDbModel.Amount,
-            transactionDbModel.Commission,
-            transactionDbModel.Currency,
-            transactionDbModel.FromAccountId,
-            transactionDbModel.ToAccountId);
+        return new Transaction
+        {
+            Id = transactionDbModel.Id,
+            Amount = transactionDbModel.Amount,
+            Commission = transactionDbModel.Commission,
+            Currency = transactionDbModel.Currency,
+            FromAccountId = transactionDbModel.FromAccountId,
+            ToAccountId = transactionDbModel.ToAccountId
+        };
     }
 
     public IEnumerable<Transaction> GetAllTransactions()
     {
-        return Transactions.Select(t => new Transaction(
-            t.Id,
-            t.Amount,
-            t.Commission,
-            t.Currency,
-            t.FromAccountId,
-            t.ToAccountId));
+        return Transactions.Select(t => new Transaction
+        {
+            Id = t.Id,
+            Amount = t.Amount,
+            Commission = t.Commission,
+            Currency = t.Currency,
+            FromAccountId = t.FromAccountId,
+            ToAccountId = t.ToAccountId
+        });
     }
 
     public Guid CreateTransaction(Transaction transaction)

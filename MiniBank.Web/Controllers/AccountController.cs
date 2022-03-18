@@ -53,10 +53,12 @@ public class AccountController : ControllerBase
     [HttpPost("CreateAccount")]
     public Guid CreateAccount([FromQuery] AccountInfoDto accountInfoDto)
     {
-        var account = new Account(
-            accountInfoDto.UserId,
-            accountInfoDto.Balance,
-            accountInfoDto.Currency);
+        var account = new Account
+        {
+            UserId = accountInfoDto.UserId,
+            Balance = accountInfoDto.Balance,
+            Currency = accountInfoDto.Currency
+        };
 
         return _accountService.CreateAccount(account);
     }

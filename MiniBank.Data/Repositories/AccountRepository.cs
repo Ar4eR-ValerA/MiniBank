@@ -13,7 +13,7 @@ public class AccountRepository : IAccountRepository
     {
         return Accounts.FirstOrDefault(a => a.Id == id);
     }
-    
+
     public Account GetAccountById(Guid id)
     {
         var accountDbModel = GetAccountDbModelById(id);
@@ -23,25 +23,30 @@ public class AccountRepository : IAccountRepository
             throw new NotFoundException("There is no account with such id");
         }
 
-        return new Account(accountDbModel.Id,
-            accountDbModel.UserId,
-            accountDbModel.Balance,
-            accountDbModel.Currency,
-            accountDbModel.IsActive,
-            accountDbModel.DateOpened,
-            accountDbModel.DateClosed);
+        return new Account
+        {
+            Id = accountDbModel.Id,
+            UserId = accountDbModel.UserId,
+            Balance = accountDbModel.Balance,
+            Currency = accountDbModel.Currency,
+            IsActive = accountDbModel.IsActive,
+            DateOpened = accountDbModel.DateOpened,
+            DateClosed = accountDbModel.DateClosed
+        };
     }
 
     public IEnumerable<Account> GetAllAccounts()
     {
-        return Accounts.Select(a => new Account(
-            a.Id,
-            a.UserId,
-            a.Balance,
-            a.Currency,
-            a.IsActive,
-            a.DateOpened,
-            a.DateClosed));
+        return Accounts.Select(a => new Account
+        {
+            Id = a.Id,
+            UserId = a.UserId,
+            Balance = a.Balance,
+            Currency = a.Currency,
+            IsActive = a.IsActive,
+            DateOpened = a.DateOpened,
+            DateClosed = a.DateClosed
+        });
     }
 
     public Guid CreateAccount(Account account)

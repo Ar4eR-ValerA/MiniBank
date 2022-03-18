@@ -1,5 +1,4 @@
 ﻿using MiniBank.Core.Entities;
-using MiniBank.Core.Entities.Builders;
 using MiniBank.Core.Repositories;
 using MiniBank.Core.Services.Interfaces;
 using MiniBank.Core.Tools;
@@ -27,20 +26,15 @@ public class UserService : IUserService
         return _userRepository.GetAllUsers();
     }
 
-    public Guid CreateUser(UserBuilder userBuilder)
+    public Guid CreateUser(User user)
     {
-        var user = userBuilder.Build();
+        user.Id = Guid.NewGuid();
 
         return _userRepository.CreateUser(user);
     }
 
-    public void UpdateUser(Guid id, UserBuilder userBuilder)
+    public void UpdateUser(User user)
     {
-        var user = _userRepository.GetUserById(id);
-
-        user.Login = userBuilder.Login;
-        user.Email = userBuilder.Email;
-        
         _userRepository.UpdateUser(user);
     }
 
