@@ -4,9 +4,9 @@ namespace MiniBank.Core.Repositories;
 
 public interface IUserRepository
 {
-    User GetUserById(Guid id);
-    IEnumerable<User> GetAllUsers();
-    Guid CreateUser(User user);
-    void UpdateUser(User user);
-    void DeleteUser(Guid id);
+    User GetById(Guid id);
+    IEnumerable<User> GetAll();
+    Guid Create(User user);
+    void Update(User user);
+    void Delete(Guid id);
 }

@@ -6,7 +6,7 @@ public interface IUserService
 {
     User GetById(Guid id);
     IEnumerable<User> GetAll();
-    Guid CreateUser(User user);
-    void UpdateUser(User user);
-    void DeleteUser(Guid id);
+    Guid Create(User user);
+    void Update(User user);
+    void Delete(Guid id);
 }

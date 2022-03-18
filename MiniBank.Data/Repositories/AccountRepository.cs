@@ -14,7 +14,7 @@ public class AccountRepository : IAccountRepository
         return Accounts.FirstOrDefault(a => a.Id == id);
     }
 
-    public Account GetAccountById(Guid id)
+    public Account GetById(Guid id)
     {
         var accountDbModel = GetAccountDbModelById(id);
 
@@ -35,7 +35,7 @@ public class AccountRepository : IAccountRepository
         };
     }
 
-    public IEnumerable<Account> GetAllAccounts()
+    public IEnumerable<Account> GetAll()
     {
         return Accounts.Select(a => new Account
         {
@@ -49,7 +49,7 @@ public class AccountRepository : IAccountRepository
         });
     }
 
-    public Guid CreateAccount(Account account)
+    public Guid Create(Account account)
     {
         var accountDbModel = new AccountDbModel
         {
@@ -67,7 +67,7 @@ public class AccountRepository : IAccountRepository
         return accountDbModel.Id;
     }
 
-    public void UpdateAccount(Account account)
+    public void Update(Account account)
     {
         var accountDbModel = GetAccountDbModelById(account.Id);
 
@@ -84,7 +84,7 @@ public class AccountRepository : IAccountRepository
         accountDbModel.UserId = account.UserId;
     }
 
-    public void DeleteAccount(Guid id)
+    public void Delete(Guid id)
     {
         var accountDbModel = GetAccountDbModelById(id);
 

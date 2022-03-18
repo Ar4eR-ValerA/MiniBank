@@ -14,7 +14,7 @@ public class UserRepository : IUserRepository
         return Users.FirstOrDefault(u => u.Id == id);
     }
 
-    public User GetUserById(Guid id)
+    public User GetById(Guid id)
     {
         var userDbModel = GetUserDbModelById(id);
 
@@ -31,7 +31,7 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public IEnumerable<User> GetAllUsers()
+    public IEnumerable<User> GetAll()
     {
         return Users.Select(u => new User
         {
@@ -41,7 +41,7 @@ public class UserRepository : IUserRepository
         });
     }
 
-    public Guid CreateUser(User user)
+    public Guid Create(User user)
     {
         var userDbModel = new UserDbModel
         {
@@ -55,7 +55,7 @@ public class UserRepository : IUserRepository
         return userDbModel.Id;
     }
 
-    public void UpdateUser(User user)
+    public void Update(User user)
     {
         var userDbModel = GetUserDbModelById(user.Id);
 
@@ -68,7 +68,7 @@ public class UserRepository : IUserRepository
         userDbModel.Email = user.Email;
     }
 
-    public void DeleteUser(Guid id)
+    public void Delete(Guid id)
     {
         var userDbModel = GetUserDbModelById(id);
 

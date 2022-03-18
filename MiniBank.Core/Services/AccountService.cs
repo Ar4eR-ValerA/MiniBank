@@ -54,17 +54,17 @@ public class AccountService : IAccountService
     
     public Account GetById(Guid id)
     {
-        return _accountRepository.GetAccountById(id);
+        return _accountRepository.GetById(id);
     }
 
     public IEnumerable<Account> GetAll()
     {
-        return _accountRepository.GetAllAccounts();
+        return _accountRepository.GetAll();
     }
 
-    public Guid CreateAccount(Account account)
+    public Guid Create(Account account)
     {
-        _userRepository.GetUserById(account.UserId);
+        _userRepository.GetById(account.UserId);
         
         if (account.Currency is not ("RUB" or "EUR" or "USD"))
         {
@@ -80,12 +80,12 @@ public class AccountService : IAccountService
         account.DateOpened = DateTime.Now;
         account.IsActive = true;
 
-        return _accountRepository.CreateAccount(account);
+        return _accountRepository.Create(account);
     }
 
-    public void CloseAccount(Guid id)
+    public void Close(Guid id)
     {
-        var account = _accountRepository.GetAccountById(id);
+        var account = _accountRepository.GetById(id);
         
         if (!account.IsActive)
         {
@@ -100,7 +100,7 @@ public class AccountService : IAccountService
         account.IsActive = false;
         account.DateClosed = DateTime.Now;
 
-        _accountRepository.UpdateAccount(account);
+        _accountRepository.Update(account);
     }
 
     public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
@@ -110,8 +110,8 @@ public class AccountService : IAccountService
             throw new ValidationException("Amount must be positive");
         }
 
-        var fromAccount = _accountRepository.GetAccountById(fromAccountId);
-        var toAccount = _accountRepository.GetAccountById(toAccountId);
+        var fromAccount = _accountRepository.GetById(fromAccountId);
+        var toAccount = _accountRepository.GetById(toAccountId);
 
         if (fromAccount.UserId == toAccount.UserId)
         {
@@ -125,8 +125,8 @@ public class AccountService : IAccountService
 
     public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
     {
-        var fromAccount = _accountRepository.GetAccountById(fromAccountId);
-        var toAccount = _accountRepository.GetAccountById(toAccountId);
+        var fromAccount = _accountRepository.GetById(fromAccountId);
+        var toAccount = _accountRepository.GetById(toAccountId);
 
         ThrowIfTransactionInvalid(amount, fromAccount, toAccount);
 
@@ -140,8 +140,8 @@ public class AccountService : IAccountService
         fromAccount.Balance -= amount;
         toAccount.Balance += convertedTransactionAmount;
 
-        _accountRepository.UpdateAccount(fromAccount);
-        _accountRepository.UpdateAccount(toAccount);
+        _accountRepository.Update(fromAccount);
+        _accountRepository.Update(toAccount);
 
         var transaction = new Transaction
         {
@@ -152,6 +152,6 @@ public class AccountService : IAccountService
             FromAccountId = fromAccountId,
             ToAccountId = toAccountId
         };
-        return _transactionRepository.CreateTransaction(transaction);
+        return _transactionRepository.Create(transaction);
     }
 }

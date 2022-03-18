@@ -14,7 +14,7 @@ public class TransactionRepository : ITransactionRepository
         return Transactions.FirstOrDefault(t => t.Id == id);
     }
 
-    public Transaction GetTransactionById(Guid id)
+    public Transaction GetById(Guid id)
     {
         var transactionDbModel = GetTransactionDbModelById(id);
 
@@ -34,7 +34,7 @@ public class TransactionRepository : ITransactionRepository
         };
     }
 
-    public IEnumerable<Transaction> GetAllTransactions()
+    public IEnumerable<Transaction> GetAll()
     {
         return Transactions.Select(t => new Transaction
         {
@@ -47,7 +47,7 @@ public class TransactionRepository : ITransactionRepository
         });
     }
 
-    public Guid CreateTransaction(Transaction transaction)
+    public Guid Create(Transaction transaction)
     {
         var transactionDbModel = new TransactionDbModel
         {
@@ -64,7 +64,7 @@ public class TransactionRepository : ITransactionRepository
         return transactionDbModel.Id;
     }
 
-    public void UpdateTransaction(Transaction transaction)
+    public void Update(Transaction transaction)
     {
         var transactionDbModel = GetTransactionDbModelById(transaction.Id);
 
@@ -80,7 +80,7 @@ public class TransactionRepository : ITransactionRepository
         transactionDbModel.ToAccountId = transaction.ToAccountId;
     }
 
-    public void DeleteTransaction(Guid id)
+    public void Delete(Guid id)
     {
         var transactionDbModel = GetTransactionDbModelById(id);
 

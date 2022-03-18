@@ -16,8 +16,8 @@ public class AccountController : ControllerBase
         _accountService = accountService;
     }
 
-    [HttpGet("GetAccountById")]
-    public AccountDto GetAccountById([FromQuery] Guid id)
+    [HttpGet("GetById")]
+    public AccountDto GetById([FromQuery] Guid id)
     {
         var account = _accountService.GetById(id);
 
@@ -33,8 +33,8 @@ public class AccountController : ControllerBase
         };
     }
 
-    [HttpGet("GetAllAccounts")]
-    public IEnumerable<AccountDto> GetAllAccounts()
+    [HttpGet("GetAll")]
+    public IEnumerable<AccountDto> GetAll()
     {
         var accounts = _accountService.GetAll();
 
@@ -50,8 +50,8 @@ public class AccountController : ControllerBase
         });
     }
 
-    [HttpPost("CreateAccount")]
-    public Guid CreateAccount([FromQuery] AccountInfoDto accountInfoDto)
+    [HttpPost("Create")]
+    public Guid Create([FromQuery] AccountInfoDto accountInfoDto)
     {
         var account = new Account
         {
@@ -60,13 +60,13 @@ public class AccountController : ControllerBase
             Currency = accountInfoDto.Currency
         };
 
-        return _accountService.CreateAccount(account);
+        return _accountService.Create(account);
     }
 
-    [HttpPut("CloseAccount")]
-    public void CloseAccount(Guid id)
+    [HttpPut("Close")]
+    public void Close(Guid id)
     {
-        _accountService.CloseAccount(id);
+        _accountService.Close(id);
     }
 
     [HttpGet("CalculateCommission")]

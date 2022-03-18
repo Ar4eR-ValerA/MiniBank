@@ -18,33 +18,33 @@ public class UserService : IUserService
 
     public User GetById(Guid id)
     {
-        return _userRepository.GetUserById(id);
+        return _userRepository.GetById(id);
     }
 
     public IEnumerable<User> GetAll()
     {
-        return _userRepository.GetAllUsers();
+        return _userRepository.GetAll();
     }
 
-    public Guid CreateUser(User user)
+    public Guid Create(User user)
     {
         user.Id = Guid.NewGuid();
 
-        return _userRepository.CreateUser(user);
+        return _userRepository.Create(user);
     }
 
-    public void UpdateUser(User user)
+    public void Update(User user)
     {
-        _userRepository.UpdateUser(user);
+        _userRepository.Update(user);
     }
 
-    public void DeleteUser(Guid id)
+    public void Delete(Guid id)
     {
         if (_accountRepository.HasUserLinkedAccounts(id))
         {
             throw new UserFriendlyException("You can't delete user with linked accounts");
         }
         
-        _userRepository.DeleteUser(id);
+        _userRepository.Delete(id);
     }
 }
