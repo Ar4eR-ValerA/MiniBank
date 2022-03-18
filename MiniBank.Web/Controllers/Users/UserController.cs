@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MiniBank.Core.Entities;
 using MiniBank.Core.Services.Interfaces;
-using MiniBank.Web.Dtos;
+using MiniBank.Web.Controllers.Users.Dto;
 
-namespace MiniBank.Web.Controllers;
+namespace MiniBank.Web.Controllers.Users;
 
 [ApiController]
 [Route("[controller]")]

@@ -1,4 +1,4 @@
-﻿namespace MiniBank.Web.Dtos;
+﻿namespace MiniBank.Web.Controllers.Accounts.Dto;
 
 public class AccountDto
 {
