@@ -90,4 +90,11 @@ public class AccountRepository : IAccountRepository
 
         Accounts.Remove(accountDbModel);
     }
+
+    public bool HasUserLinkedAccounts(Guid usedId)
+    {
+        var accountDbModel = Accounts.FirstOrDefault(a => a.UserId == usedId);
+
+        return accountDbModel is not null;
+    }
 }

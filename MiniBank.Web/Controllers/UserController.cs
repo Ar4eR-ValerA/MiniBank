@@ -25,8 +25,7 @@ public class UserController : ControllerBase
         {
             Id = user.Id,
             Login = user.Login,
-            Email = user.Email,
-            AccountsAmount = user.AccountsAmount
+            Email = user.Email
         };
     }
 
@@ -39,8 +38,7 @@ public class UserController : ControllerBase
         {
             Id = u.Id,
             Login = u.Login,
-            Email = u.Email,
-            AccountsAmount = u.AccountsAmount
+            Email = u.Email
         });
     }
 

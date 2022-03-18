@@ -36,10 +36,7 @@ public class AccountService : IAccountService
 
     public Guid CreateAccount(Account account)
     {
-        var user = _userRepository.GetUserById(account.UserId);
-
-        user.IncreaseAccountsAmount();
-        _userRepository.UpdateUser(user);
+        _userRepository.GetUserById(account.UserId);
 
         return _accountRepository.CreateAccount(account);
     }
@@ -47,12 +44,8 @@ public class AccountService : IAccountService
     public void CloseAccount(Guid id)
     {
         var account = _accountRepository.GetAccountById(id);
-
         account.DisableAccount();
-        var user = _userRepository.GetUserById(account.UserId);
-        user.DecreaseAccountsAmount();
-
-        _userRepository.UpdateUser(user);
+        
         _accountRepository.UpdateAccount(account);
     }
 

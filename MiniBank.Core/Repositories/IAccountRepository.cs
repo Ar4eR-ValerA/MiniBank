@@ -9,4 +9,5 @@ public interface IAccountRepository
     Guid CreateAccount(Account account);
     void UpdateAccount(Account account);
     void DeleteAccount(Guid id);
+    bool HasUserLinkedAccounts(Guid usedId);
 }

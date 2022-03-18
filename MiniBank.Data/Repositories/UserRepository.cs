@@ -23,12 +23,12 @@ public class UserRepository : IUserRepository
             throw new NotFoundException("There is no user with such id");
         }
 
-        return new User(userDbModel.Id, userDbModel.Login, userDbModel.Email, userDbModel.AccountsAmount);
+        return new User(userDbModel.Id, userDbModel.Login, userDbModel.Email);
     }
 
     public IEnumerable<User> GetAllUsers()
     {
-        return Users.Select(u => new User(u.Id, u.Login, u.Email, u.AccountsAmount));
+        return Users.Select(u => new User(u.Id, u.Login, u.Email));
     }
 
     public Guid CreateUser(User user)
@@ -37,8 +37,7 @@ public class UserRepository : IUserRepository
         {
             Id = Guid.NewGuid(),
             Login = user.Login,
-            Email = user.Email,
-            AccountsAmount = 0
+            Email = user.Email
         };
 
         Users.Add(userDbModel);
@@ -57,7 +56,6 @@ public class UserRepository : IUserRepository
 
         userDbModel.Login = user.Login;
         userDbModel.Email = user.Email;
-        userDbModel.AccountsAmount = user.AccountsAmount;
     }
 
     public void DeleteUser(Guid id)

@@ -9,10 +9,12 @@ namespace MiniBank.Core.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IAccountRepository _accountRepository;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IAccountRepository accountRepository)
     {
         _userRepository = userRepository;
+        _accountRepository = accountRepository;
     }
 
     public User GetById(Guid id)
@@ -44,11 +46,9 @@ public class UserService : IUserService
 
     public void DeleteUser(Guid id)
     {
-        var user = GetById(id);
-
-        if (user.AccountsAmount > 0)
+        if (_accountRepository.HasUserLinkedAccounts(id))
         {
-            throw new UserFriendlyException("This user has not closed accounts");
+            throw new UserFriendlyException("You can't delete user with linked accounts");
         }
         
         _userRepository.DeleteUser(id);
