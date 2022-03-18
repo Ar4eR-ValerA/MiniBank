@@ -4,7 +4,7 @@ namespace MiniBank.Core.Entities;
 
 public class Transaction
 {
-    public Transaction(double amount, string currency, Guid fromAccountId, Guid toAccountId)
+    public Transaction(double amount, double commission, string currency, Guid fromAccountId, Guid toAccountId)
     {
         Id = Guid.NewGuid();
 
@@ -14,6 +14,7 @@ public class Transaction
         }
 
         Amount = amount;
+        Commission = commission;
         Currency = currency;
 
         if (fromAccountId == toAccountId)
@@ -25,10 +26,11 @@ public class Transaction
         ToAccountId = toAccountId;
     }
 
-    public Transaction(Guid id, double amount, string currency, Guid fromAccountId, Guid toAccountId)
+    public Transaction(Guid id, double amount, double commission, string currency, Guid fromAccountId, Guid toAccountId)
     {
         Id = id;
         Amount = amount;
+        Commission = commission;
         Currency = currency;
         FromAccountId = fromAccountId;
         ToAccountId = toAccountId;
@@ -36,6 +38,7 @@ public class Transaction
 
     public Guid Id { get; }
     public double Amount { get; }
+    public double Commission { get; }
     public string Currency { get; }
     public Guid FromAccountId { get; }
     public Guid ToAccountId { get; }

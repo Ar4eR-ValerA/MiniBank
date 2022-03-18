@@ -88,13 +88,13 @@ public class AccountService : IAccountService
             fromAccount.Currency,
             toAccount.Currency);
 
-        fromAccount.Balance -= finalAmount;
+        fromAccount.Balance -= amount;
         toAccount.Balance += convertedFinalAmount;
 
         _accountRepository.UpdateAccount(fromAccount);
         _accountRepository.UpdateAccount(toAccount);
 
-        var transaction = new Transaction(finalAmount, fromAccount.Currency, fromAccountId, toAccountId);
+        var transaction = new Transaction(finalAmount, commission, fromAccount.Currency, fromAccountId, toAccountId);
         return _transactionRepository.CreateTransaction(transaction);
     }
 }

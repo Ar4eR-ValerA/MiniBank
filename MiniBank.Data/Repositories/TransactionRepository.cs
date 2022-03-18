@@ -26,6 +26,7 @@ public class TransactionRepository : ITransactionRepository
         return new Transaction(
             transactionDbModel.Id,
             transactionDbModel.Amount,
+            transactionDbModel.Commission,
             transactionDbModel.Currency,
             transactionDbModel.FromAccountId,
             transactionDbModel.ToAccountId);
@@ -36,6 +37,7 @@ public class TransactionRepository : ITransactionRepository
         return Transactions.Select(t => new Transaction(
             t.Id,
             t.Amount,
+            t.Commission,
             t.Currency,
             t.FromAccountId,
             t.ToAccountId));
@@ -47,6 +49,7 @@ public class TransactionRepository : ITransactionRepository
         {
             Id = Guid.NewGuid(),
             Amount = transaction.Amount,
+            Commission = transaction.Commission,
             Currency = transaction.Currency,
             FromAccountId = transaction.FromAccountId,
             ToAccountId = transaction.ToAccountId
@@ -67,6 +70,7 @@ public class TransactionRepository : ITransactionRepository
         }
 
         transactionDbModel.Amount = transaction.Amount;
+        transactionDbModel.Commission = transactionDbModel.Commission;
         transactionDbModel.Currency = transaction.Currency;
         transactionDbModel.FromAccountId = transaction.FromAccountId;
         transactionDbModel.ToAccountId = transaction.ToAccountId;
