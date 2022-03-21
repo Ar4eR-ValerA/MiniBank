@@ -4,8 +4,10 @@ using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Domain.CurrencyRates.Providers;
 using MiniBank.Core.Domain.Transactions.Repositories;
 using MiniBank.Core.Domain.Users.Repositories;
-using MiniBank.Data.Repositories;
-using MiniBank.Data.Services;
+using MiniBank.Data.Accounts.Repositories;
+using MiniBank.Data.CurrencyRates.Providers;
+using MiniBank.Data.Transactions.Repositories;
+using MiniBank.Data.Users.Repositories;
 
 namespace MiniBank.Data;
 

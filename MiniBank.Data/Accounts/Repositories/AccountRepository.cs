@@ -1,9 +1,8 @@
 ﻿using MiniBank.Core.Domain.Accounts;
 using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Tools;
-using MiniBank.Data.Repositories.DbModels;
 
-namespace MiniBank.Data.Repositories;
+namespace MiniBank.Data.Accounts.Repositories;
 
 public class AccountRepository : IAccountRepository
 {

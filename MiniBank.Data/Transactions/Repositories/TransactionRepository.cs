@@ -1,9 +1,8 @@
 ﻿using MiniBank.Core.Domain.Transactions;
 using MiniBank.Core.Domain.Transactions.Repositories;
 using MiniBank.Core.Tools;
-using MiniBank.Data.Repositories.DbModels;
 
-namespace MiniBank.Data.Repositories;
+namespace MiniBank.Data.Transactions.Repositories;
 
 public class TransactionRepository : ITransactionRepository
 {

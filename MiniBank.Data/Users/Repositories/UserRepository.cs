@@ -1,9 +1,8 @@
 ﻿using MiniBank.Core.Domain.Users;
 using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
-using MiniBank.Data.Repositories.DbModels;
 
-namespace MiniBank.Data.Repositories;
+namespace MiniBank.Data.Users.Repositories;
 
 public class UserRepository : IUserRepository
 {

@@ -1,4 +1,4 @@
-﻿namespace MiniBank.Data.Repositories.DbModels;
+﻿namespace MiniBank.Data.Users;
 
 public class UserDbModel
 {

@@ -1,9 +1,9 @@
 ﻿using System.Net.Http.Json;
 using MiniBank.Core.Domain.CurrencyRates.Providers;
 using MiniBank.Core.Tools;
-using MiniBank.Data.ResponseModels;
+using MiniBank.Data.CurrencyRates.Models;
 
-namespace MiniBank.Data.Services
+namespace MiniBank.Data.CurrencyRates.Providers
 {
     public class CurrencyRateProvider : ICurrencyRateProvider
     {
