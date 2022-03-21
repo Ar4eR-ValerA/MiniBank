@@ -66,6 +66,11 @@ public class AccountService : IAccountService
 
     public Guid Create(Account account)
     {
+        if (!_userRepository.IsExist(account.UserId))
+        {
+            throw new ValidationException("There is no such user");
+        }
+        
         if (account.Balance < 0)
         {
             throw new ValidationException("Balance of account can't be negative");

@@ -13,6 +13,11 @@ public class UserRepository : IUserRepository
         return Users.FirstOrDefault(u => u.Id == id);
     }
 
+    public bool IsExist(Guid id)
+    {
+        return Users.Exists(u => u.Id == id);
+    }
+
     public User GetById(Guid id)
     {
         var userDbModel = GetUserDbModelById(id);

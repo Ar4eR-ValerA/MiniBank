@@ -2,6 +2,7 @@
 
 public interface ITransactionRepository
 {
+    
     Transaction GetById(Guid id);
     IEnumerable<Transaction> GetAll();
     Guid Create(Transaction transaction);
