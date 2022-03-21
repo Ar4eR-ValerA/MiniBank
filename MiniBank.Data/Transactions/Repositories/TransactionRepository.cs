@@ -19,7 +19,7 @@ public class TransactionRepository : ITransactionRepository
 
         if (transactionDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no transaction with such id");
+            throw new ObjectNotFoundException($"There is no transaction with such id: {id}");
         }
 
         return new Transaction
@@ -69,7 +69,7 @@ public class TransactionRepository : ITransactionRepository
 
         if (transactionDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no such transaction");
+            throw new ObjectNotFoundException($"There is no transaction with such id: {transaction.Id}");
         }
 
         transactionDbModel.Amount = transaction.Amount;
@@ -85,7 +85,7 @@ public class TransactionRepository : ITransactionRepository
 
         if (transactionDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no such transaction");
+            throw new ObjectNotFoundException($"There is no transaction with such id: {id}");
         }
 
         Transactions.Remove(transactionDbModel);

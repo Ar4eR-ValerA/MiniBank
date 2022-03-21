@@ -24,7 +24,7 @@ public class UserRepository : IUserRepository
 
         if (userDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no user with such id");
+            throw new ObjectNotFoundException($"There is no user with such id: {id}");
         }
 
         return new User
@@ -65,7 +65,7 @@ public class UserRepository : IUserRepository
 
         if (userDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no such user");
+            throw new ObjectNotFoundException($"There is no user with such id: {user.Id}");
         }
 
         userDbModel.Login = user.Login;
@@ -78,7 +78,7 @@ public class UserRepository : IUserRepository
 
         if (userDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no such user");
+            throw new ObjectNotFoundException($"There is no user with such id: {id}");
         }
 
         Users.Remove(userDbModel);

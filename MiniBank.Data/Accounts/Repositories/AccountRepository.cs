@@ -19,7 +19,7 @@ public class AccountRepository : IAccountRepository
 
         if (accountDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no account with such id");
+            throw new ObjectNotFoundException($"There is no account with such id: {id}");
         }
 
         return new Account
@@ -72,7 +72,7 @@ public class AccountRepository : IAccountRepository
 
         if (accountDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no such account");
+            throw new ObjectNotFoundException($"There is no account with such id: {account.Id}");
         }
 
         accountDbModel.Balance = account.Balance;
@@ -89,7 +89,7 @@ public class AccountRepository : IAccountRepository
 
         if (accountDbModel is null)
         {
-            throw new ObjectNotFoundException("There is no such account");
+            throw new ObjectNotFoundException($"There is no account with such id: {id}");
         }
 
         Accounts.Remove(accountDbModel);

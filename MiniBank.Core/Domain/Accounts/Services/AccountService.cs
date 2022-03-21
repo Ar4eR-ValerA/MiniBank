@@ -68,7 +68,7 @@ public class AccountService : IAccountService
     {
         if (!_userRepository.IsExist(account.UserId))
         {
-            throw new ValidationException("There is no such user");
+            throw new ValidationException($"There is no user with such id: {account.UserId}");
         }
         
         if (account.Balance < 0)
