@@ -1,7 +1,7 @@
-﻿using MiniBank.Core.Domain.CurrencyRates.Providers;
+﻿using MiniBank.Core.Domain.Currencies.Providers;
 using MiniBank.Core.Tools;
 
-namespace MiniBank.Core.Domain.CurrencyRates.Services
+namespace MiniBank.Core.Domain.Currencies.Services
 {
     public class CurrencyRateConversionService : ICurrencyRateConversionService
     {
@@ -12,7 +12,7 @@ namespace MiniBank.Core.Domain.CurrencyRates.Services
             _currencyRateProvider = currencyRateProvider;
         }
         
-        public double ConvertCurrencyRate(double amount, string fromCurrencyCode, string toCurrencyCode)
+        public double ConvertCurrencyRate(double amount, Currency fromCurrencyCode, Currency toCurrencyCode)
         {
             if (amount < 0)
             {

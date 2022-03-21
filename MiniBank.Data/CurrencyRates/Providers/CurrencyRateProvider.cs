@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
-using MiniBank.Core.Domain.CurrencyRates.Providers;
+using MiniBank.Core.Domain.Currencies;
+using MiniBank.Core.Domain.Currencies.Providers;
 using MiniBank.Core.Tools;
 using MiniBank.Data.CurrencyRates.Models;
 
@@ -14,7 +15,7 @@ namespace MiniBank.Data.CurrencyRates.Providers
             _client = httpClient;
         }
 
-        public double GetCurrencyRate(string fromCurrencyCode, string toCurrencyCode)
+        public double GetCurrencyRate(Currency fromCurrencyCode, Currency toCurrencyCode)
         {
             double fromCurrencyRubleRate = GetCurrencyRubleRate(fromCurrencyCode);
             double toCurrencyRubleRate = GetCurrencyRubleRate(toCurrencyCode);
@@ -22,7 +23,7 @@ namespace MiniBank.Data.CurrencyRates.Providers
             return fromCurrencyRubleRate / toCurrencyRubleRate;
         }
 
-        private double GetCurrencyRubleRate(string currencyCode)
+        private double GetCurrencyRubleRate(Currency currencyCode)
         {
             CurrenciesModel response = _client
                 .GetFromJsonAsync<CurrenciesModel>("")
@@ -34,17 +35,17 @@ namespace MiniBank.Data.CurrencyRates.Providers
                 throw new Exception("Can't get response");
             }
 
-            if (currencyCode == "RUB")
+            if (currencyCode == Currency.RUB)
             {
                 return 1;
             }
             
-            if (!response.Valute.ContainsKey(currencyCode))
+            if (!response.Valute.ContainsKey(currencyCode.ToString()))
             {
                 throw new ValidationException($"There is no such currency code: {currencyCode}");
             }
 
-            CurrencyModel currency = response.Valute[currencyCode];
+            CurrencyModel currency = response.Valute[currencyCode.ToString()];
             return currency.Value / currency.Nominal;
         }
     }

@@ -1,4 +1,5 @@
-﻿using MiniBank.Core;
+﻿using System.Text.Json.Serialization;
+using MiniBank.Core;
 using MiniBank.Data;
 using MiniBank.Web.Middlewares;
 
@@ -15,7 +16,13 @@ namespace MiniBank.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services
+                .AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 

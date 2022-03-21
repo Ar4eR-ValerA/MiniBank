@@ -1,5 +1,5 @@
 ﻿using MiniBank.Core.Domain.Accounts.Repositories;
-using MiniBank.Core.Domain.CurrencyRates.Services;
+using MiniBank.Core.Domain.Currencies.Services;
 using MiniBank.Core.Domain.Transactions;
 using MiniBank.Core.Domain.Transactions.Repositories;
 using MiniBank.Core.Domain.Users.Repositories;
@@ -66,13 +66,6 @@ public class AccountService : IAccountService
 
     public Guid Create(Account account)
     {
-        _userRepository.GetById(account.UserId);
-        
-        if (account.Currency is not ("RUB" or "EUR" or "USD"))
-        {
-            throw new ValidationException("Currency of account must be RUB, EUR or USD");
-        }
-
         if (account.Balance < 0)
         {
             throw new ValidationException("Balance of account can't be negative");

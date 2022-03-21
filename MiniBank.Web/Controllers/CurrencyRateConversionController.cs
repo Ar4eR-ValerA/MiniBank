@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MiniBank.Core.Domain.CurrencyRates.Services;
+using MiniBank.Core.Domain.Currencies;
+using MiniBank.Core.Domain.Currencies.Services;
 
 namespace MiniBank.Web.Controllers
 {
@@ -15,7 +16,7 @@ namespace MiniBank.Web.Controllers
         }
 
         [HttpGet]
-        public double ConvertRubleRate([FromQuery] double amount, string fromCurrencyCode, string toCurrencyCode)
+        public double ConvertRubleRate(double amount, Currency fromCurrencyCode, Currency toCurrencyCode)
         {
             return _currencyRateConversionService.ConvertCurrencyRate(amount, fromCurrencyCode, toCurrencyCode);
         }
