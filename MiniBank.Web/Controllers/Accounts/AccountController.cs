@@ -16,7 +16,7 @@ public class AccountController : ControllerBase
         _accountService = accountService;
     }
 
-    [HttpGet("GetById")]
+    [HttpGet("get/{id:guid}")]
     public AccountDto GetById(Guid id)
     {
         var account = _accountService.GetById(id);
@@ -33,7 +33,7 @@ public class AccountController : ControllerBase
         };
     }
 
-    [HttpGet("GetAll")]
+    [HttpGet("get")]
     public IEnumerable<AccountDto> GetAll()
     {
         var accounts = _accountService.GetAll();
@@ -50,8 +50,8 @@ public class AccountController : ControllerBase
         });
     }
 
-    [HttpPost("Create")]
-    public Guid Create([FromQuery] AccountCreateDto accountCreateDto)
+    [HttpPost("create")]
+    public Guid Create(AccountCreateDto accountCreateDto)
     {
         var account = new Account
         {
@@ -63,19 +63,19 @@ public class AccountController : ControllerBase
         return _accountService.Create(account);
     }
 
-    [HttpPut("Close")]
+    [HttpPut("close/{id:guid}")]
     public void Close(Guid id)
     {
         _accountService.Close(id);
     }
 
-    [HttpGet("CalculateCommission")]
+    [HttpGet("calculate-commission")]
     public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
     {
         return _accountService.CalculateCommission(amount, fromAccountId, toAccountId);
     }
 
-    [HttpPost("MakeTransaction")]
+    [HttpPost("make-transaction")]
     public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
     {
         return _accountService.MakeTransaction(amount, fromAccountId, toAccountId);
