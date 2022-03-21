@@ -16,7 +16,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet("GetById")]
+    [HttpGet("get/{id:guid}")]
     public UserDto GetById(Guid id)
     {
         var user = _userService.GetById(id);
@@ -29,7 +29,7 @@ public class UserController : ControllerBase
         };
     }
 
-    [HttpGet("GetAll")]
+    [HttpGet("get")]
     public IEnumerable<UserDto> GetAll()
     {
         var users = _userService.GetAll();
@@ -42,8 +42,8 @@ public class UserController : ControllerBase
         });
     }
 
-    [HttpPost("Create")]
-    public Guid Create([FromQuery] UserCreateDto userCreateDto)
+    [HttpPost("create")]
+    public Guid Create(UserCreateDto userCreateDto)
     {
         var user = new User
         {
@@ -54,20 +54,20 @@ public class UserController : ControllerBase
         return _userService.Create(user);
     }
 
-    [HttpPut("Update")]
-    public void Update([FromQuery] UserDto userDto)
+    [HttpPut("update/{id:guid}")]
+    public void Update(Guid id, UserUpdateDto userUpdateDto)
     {
         var user = new User
         {
-            Id = userDto.Id,
-            Login = userDto.Login,
-            Email = userDto.Email
+            Id = id,
+            Login = userUpdateDto.Login,
+            Email = userUpdateDto.Email
         };
 
         _userService.Update(user);
     }
 
-    [HttpDelete("Delete")]
+    [HttpDelete("Delete/{id:guid}")]
     public void Delete(Guid id)
     {
         _userService.Delete(id);
