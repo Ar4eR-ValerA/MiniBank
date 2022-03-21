@@ -1,9 +1,8 @@
-﻿using MiniBank.Core.Entities;
-using MiniBank.Core.Repositories;
-using MiniBank.Core.Services.Interfaces;
+﻿using MiniBank.Core.Domain.Accounts.Repositories;
+using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
 
-namespace MiniBank.Core.Services;
+namespace MiniBank.Core.Domain.Users.Services;
 
 public class UserService : IUserService
 {

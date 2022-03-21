@@ -1,4 +1,4 @@
-﻿namespace MiniBank.Core.Entities;
+﻿namespace MiniBank.Core.Domain.Accounts;
 
 public class Account
 {

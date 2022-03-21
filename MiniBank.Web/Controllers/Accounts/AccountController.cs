@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MiniBank.Core.Entities;
-using MiniBank.Core.Services.Interfaces;
+using MiniBank.Core.Domain.Accounts;
+using MiniBank.Core.Domain.Accounts.Services;
 using MiniBank.Web.Controllers.Accounts.Dto;
 
 namespace MiniBank.Web.Controllers.Accounts;

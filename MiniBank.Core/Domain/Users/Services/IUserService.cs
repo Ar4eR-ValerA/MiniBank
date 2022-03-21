@@ -1,6 +1,4 @@
-﻿using MiniBank.Core.Entities;
-
-namespace MiniBank.Core.Services.Interfaces;
+﻿namespace MiniBank.Core.Domain.Users.Services;
 
 public interface IUserService
 {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using MiniBank.Core.Services;
-using MiniBank.Core.Services.Interfaces;
+using MiniBank.Core.Domain.Accounts.Services;
+using MiniBank.Core.Domain.CurrencyRates.Services;
+using MiniBank.Core.Domain.Users.Services;
 
 namespace MiniBank.Core;
 

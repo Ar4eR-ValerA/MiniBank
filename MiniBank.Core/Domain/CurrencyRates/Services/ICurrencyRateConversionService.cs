@@ -1,4 +1,4 @@
-﻿namespace MiniBank.Core.Services.Interfaces
+﻿namespace MiniBank.Core.Domain.CurrencyRates.Services
 {
     public interface ICurrencyRateConversionService
     {

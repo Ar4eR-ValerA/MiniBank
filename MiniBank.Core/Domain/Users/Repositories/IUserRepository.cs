@@ -1,6 +1,4 @@
-﻿using MiniBank.Core.Entities;
-
-namespace MiniBank.Core.Repositories;
+﻿namespace MiniBank.Core.Domain.Users.Repositories;
 
 public interface IUserRepository
 {

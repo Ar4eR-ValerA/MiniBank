@@ -1,5 +1,5 @@
-﻿using MiniBank.Core.Entities;
-using MiniBank.Core.Repositories;
+﻿using MiniBank.Core.Domain.Users;
+using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
 using MiniBank.Data.Repositories.DbModels;
 

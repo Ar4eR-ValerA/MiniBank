@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Json;
-using MiniBank.Core.Services.Interfaces;
+using MiniBank.Core.Domain.CurrencyRates.Providers;
 using MiniBank.Core.Tools;
 using MiniBank.Data.ResponseModels;
 

@@ -1,4 +1,4 @@
-﻿namespace MiniBank.Core.Entities;
+﻿namespace MiniBank.Core.Domain.Transactions;
 
 public class Transaction
 {

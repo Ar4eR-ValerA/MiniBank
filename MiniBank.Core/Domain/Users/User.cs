@@ -1,4 +1,4 @@
-﻿namespace MiniBank.Core.Entities;
+﻿namespace MiniBank.Core.Domain.Users;
 
 public class User
 { 

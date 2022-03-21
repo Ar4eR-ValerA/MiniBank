@@ -1,7 +1,7 @@
-﻿using MiniBank.Core.Services.Interfaces;
+﻿using MiniBank.Core.Domain.CurrencyRates.Providers;
 using MiniBank.Core.Tools;
 
-namespace MiniBank.Core.Services
+namespace MiniBank.Core.Domain.CurrencyRates.Services
 {
     public class CurrencyRateConversionService : ICurrencyRateConversionService
     {

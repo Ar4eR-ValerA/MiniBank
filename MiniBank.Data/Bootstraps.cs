@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MiniBank.Core.Repositories;
-using MiniBank.Core.Services.Interfaces;
+using MiniBank.Core.Domain.Accounts.Repositories;
+using MiniBank.Core.Domain.CurrencyRates.Providers;
+using MiniBank.Core.Domain.Transactions.Repositories;
+using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Data.Repositories;
 using MiniBank.Data.Services;
 

@@ -1,9 +1,11 @@
-﻿using MiniBank.Core.Entities;
-using MiniBank.Core.Repositories;
-using MiniBank.Core.Services.Interfaces;
+﻿using MiniBank.Core.Domain.Accounts.Repositories;
+using MiniBank.Core.Domain.CurrencyRates.Services;
+using MiniBank.Core.Domain.Transactions;
+using MiniBank.Core.Domain.Transactions.Repositories;
+using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
 
-namespace MiniBank.Core.Services;
+namespace MiniBank.Core.Domain.Accounts.Services;
 
 public class AccountService : IAccountService
 {

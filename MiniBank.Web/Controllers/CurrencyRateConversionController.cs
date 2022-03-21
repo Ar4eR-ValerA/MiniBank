@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MiniBank.Core.Services.Interfaces;
+using MiniBank.Core.Domain.CurrencyRates.Services;
 
 namespace MiniBank.Web.Controllers
 {
