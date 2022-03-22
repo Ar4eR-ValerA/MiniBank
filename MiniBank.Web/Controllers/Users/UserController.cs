@@ -16,7 +16,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet("get/{id:guid}")]
+    [HttpGet("{id:guid}")]
     public UserDto GetById(Guid id)
     {
         var user = _userService.GetById(id);
@@ -29,7 +29,7 @@ public class UserController : ControllerBase
         };
     }
 
-    [HttpGet("get")]
+    [HttpGet]
     public IEnumerable<UserDto> GetAll()
     {
         var users = _userService.GetAll();
@@ -67,7 +67,7 @@ public class UserController : ControllerBase
         _userService.Update(user);
     }
 
-    [HttpDelete("Delete/{id:guid}")]
+    [HttpDelete("{id:guid}")]
     public void Delete(Guid id)
     {
         _userService.Delete(id);

@@ -16,7 +16,7 @@ public class AccountController : ControllerBase
         _accountService = accountService;
     }
 
-    [HttpGet("get/{id:guid}")]
+    [HttpGet("{id:guid}")]
     public AccountDto GetById(Guid id)
     {
         var account = _accountService.GetById(id);
@@ -33,7 +33,7 @@ public class AccountController : ControllerBase
         };
     }
 
-    [HttpGet("get")]
+    [HttpGet]
     public IEnumerable<AccountDto> GetAll()
     {
         var accounts = _accountService.GetAll();
