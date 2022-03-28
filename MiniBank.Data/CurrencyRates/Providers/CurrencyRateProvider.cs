@@ -42,7 +42,7 @@ namespace MiniBank.Data.CurrencyRates.Providers
             
             if (!response.Valute.ContainsKey(currencyCode.ToString()))
             {
-                throw new ValidationException($"There is no such currency code: {currencyCode}");
+                throw new Exception($"There is no such currency code: {currencyCode}");
             }
 
             CurrencyModel currency = response.Valute[currencyCode.ToString()];

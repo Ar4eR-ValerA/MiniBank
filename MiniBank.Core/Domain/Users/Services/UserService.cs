@@ -1,4 +1,5 @@
-﻿using MiniBank.Core.Domain.Accounts.Repositories;
+﻿using FluentValidation;
+using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
 
@@ -8,11 +9,16 @@ public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IValidator<User> _userValidator;
 
-    public UserService(IUserRepository userRepository, IAccountRepository accountRepository)
+    public UserService(
+        IUserRepository userRepository,
+        IAccountRepository accountRepository,
+        IValidator<User> userValidator)
     {
         _userRepository = userRepository;
         _accountRepository = accountRepository;
+        _userValidator = userValidator;
     }
 
     public User GetById(Guid id)
@@ -27,6 +33,8 @@ public class UserService : IUserService
 
     public Guid Create(User user)
     {
+        _userValidator.ValidateAndThrow(user);
+
         user.Id = Guid.NewGuid();
 
         return _userRepository.Create(user);
@@ -39,11 +47,16 @@ public class UserService : IUserService
 
     public void Delete(Guid id)
     {
+        if (!_userRepository.IsExist(id))
+        {
+            throw new UserFriendlyException($"There is no user with such id: {id}");
+        }
+        
         if (_accountRepository.HasUserLinkedAccounts(id))
         {
             throw new UserFriendlyException("You can't delete user with linked accounts");
         }
-        
+
         _userRepository.Delete(id);
     }
 }

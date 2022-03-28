@@ -18,6 +18,11 @@ public class UserRepository : IUserRepository
         return Users.Exists(u => u.Id == id);
     }
 
+    public bool IsLoginExists(string login)
+    {
+        return Users.Exists(u => u.Login == login);
+    }
+
     public User GetById(Guid id)
     {
         var userDbModel = GetUserDbModelById(id);
@@ -40,7 +45,7 @@ public class UserRepository : IUserRepository
         return Users.Select(u => new User
         {
             Id = u.Id,
-            Login = u.Login, 
+            Login = u.Login,
             Email = u.Email
         });
     }
