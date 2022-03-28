@@ -13,19 +13,16 @@ public class AccountService : IAccountService
     private readonly ITransactionRepository _transactionRepository;
     private readonly ICurrencyRateConversionService _currencyRateConversionService;
     private readonly IValidator<Account> _accountValidator;
-    private readonly IValidator<Transaction> _transactionValidator;
 
     public AccountService(
         IAccountRepository accountRepository,
         ICurrencyRateConversionService currencyRateConversionService,
         ITransactionRepository transactionRepository, 
-        IValidator<Account> accountValidator, 
-        IValidator<Transaction> transactionValidator)
+        IValidator<Account> accountValidator)
     {
         _accountRepository = accountRepository;
         _transactionRepository = transactionRepository;
         _accountValidator = accountValidator;
-        _transactionValidator = transactionValidator;
         _currencyRateConversionService = currencyRateConversionService;
     }
 
@@ -39,6 +36,34 @@ public class AccountService : IAccountService
         double commission = Math.Round(amount * 0.02, 2);
 
         return commission;
+    }
+    
+    private void ValidateTransactionAndThrow(double amount, Account fromAccount, Account toAccount)
+    {
+        if (fromAccount.Id == toAccount.Id)
+        {
+            throw new UserFriendlyException("Accounts must be different");
+        }
+
+        if (amount < 0)
+        {
+            throw new UserFriendlyException("Transaction amount must be positive");
+        }
+        
+        if (!fromAccount.IsActive)
+        {
+            throw new UserFriendlyException("Sender is not active");
+        }
+        
+        if (!toAccount.IsActive)
+        {
+            throw new UserFriendlyException("Receiver is not active");
+        }
+
+        if (fromAccount.Balance - amount < 0)
+        {
+            throw new UserFriendlyException("Balance will be negative after operation");
+        }
     }
     
     public Account GetById(Guid id)
@@ -109,7 +134,19 @@ public class AccountService : IAccountService
 
         double commission = CalculateCommission(amount, fromAccount, toAccount);
         double transactionAmount = amount - commission;
+        double convertedTransactionAmount = _currencyRateConversionService.ConvertCurrencyRate(
+            transactionAmount,
+            fromAccount.Currency,
+            toAccount.Currency);
+
+        ValidateTransactionAndThrow(transactionAmount, fromAccount, toAccount);
         
+        fromAccount.Balance -= amount;
+        toAccount.Balance += convertedTransactionAmount;
+
+        _accountRepository.Update(fromAccount);
+        _accountRepository.Update(toAccount);
+
         var transaction = new Transaction
         {
             Id = Guid.NewGuid(),
@@ -119,20 +156,7 @@ public class AccountService : IAccountService
             FromAccountId = fromAccountId,
             ToAccountId = toAccountId
         };
-        
-        _transactionValidator.ValidateAndThrow(transaction);
-        
-        double convertedTransactionAmount = _currencyRateConversionService.ConvertCurrencyRate(
-            transactionAmount,
-            fromAccount.Currency,
-            toAccount.Currency);
-
-        fromAccount.Balance -= amount;
-        toAccount.Balance += convertedTransactionAmount;
-
-        _accountRepository.Update(fromAccount);
-        _accountRepository.Update(toAccount);
-        
         return _transactionRepository.Create(transaction);
     }
+
 }
