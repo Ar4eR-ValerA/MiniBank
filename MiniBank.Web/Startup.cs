@@ -1,18 +1,19 @@
 ﻿using System.Text.Json.Serialization;
 using MiniBank.Core;
 using MiniBank.Data;
+using MiniBank.Web.HostedServices;
 using MiniBank.Web.Middlewares;
 
 namespace MiniBank.Web
 {
     public class Startup
     {
-        private readonly IConfiguration _configuration;
-
         public Startup(IConfiguration configuration)
         {
-            _configuration = configuration;
+            Configuration = configuration;
         }
+        
+        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -26,8 +27,12 @@ namespace MiniBank.Web
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
-            services.AddData(_configuration);
-            services.AddCore();
+            services.AddHostedService<MigrationHostedService>();
+            // TODO: Вынести в отдельную бутстрапу?
+            
+            services
+                .AddData(Configuration)
+                .AddCore();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
