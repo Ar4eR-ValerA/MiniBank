@@ -1,21 +1,22 @@
-﻿using MiniBank.Core.Domain.Transactions;
+﻿using Microsoft.EntityFrameworkCore;
+using MiniBank.Core.Domain.Transactions;
 using MiniBank.Core.Domain.Transactions.Repositories;
 using MiniBank.Core.Tools;
+using MiniBank.Data.Contexts;
 
 namespace MiniBank.Data.Transactions.Repositories;
 
 public class TransactionRepository : ITransactionRepository
 {
-    private static readonly List<TransactionDbModel> Transactions = new();
+    private readonly MiniBankContext _context;
 
-    private TransactionDbModel GetTransactionDbModelById(Guid id)
+    public TransactionRepository(MiniBankContext context)
     {
-        return Transactions.FirstOrDefault(t => t.Id == id);
+        _context = context;
     }
-
     public Transaction GetById(Guid id)
     {
-        var transactionDbModel = GetTransactionDbModelById(id);
+        var transactionDbModel = _context.Transactions.AsNoTracking().FirstOrDefault(t => t.Id == id);
 
         if (transactionDbModel is null)
         {
@@ -35,7 +36,7 @@ public class TransactionRepository : ITransactionRepository
 
     public IEnumerable<Transaction> GetAll()
     {
-        return Transactions.Select(t => new Transaction
+        return _context.Transactions.AsNoTracking().Select(t => new Transaction
         {
             Id = t.Id,
             Amount = t.Amount,
@@ -58,14 +59,14 @@ public class TransactionRepository : ITransactionRepository
             ToAccountId = transaction.ToAccountId
         };
 
-        Transactions.Add(transactionDbModel);
+        _context.Transactions.Add(transactionDbModel);
 
         return transactionDbModel.Id;
     }
 
     public void Update(Transaction transaction)
     {
-        var transactionDbModel = GetTransactionDbModelById(transaction.Id);
+        var transactionDbModel = _context.Transactions.FirstOrDefault(t => t.Id == transaction.Id);
 
         if (transactionDbModel is null)
         {
@@ -81,13 +82,13 @@ public class TransactionRepository : ITransactionRepository
 
     public void Delete(Guid id)
     {
-        var transactionDbModel = GetTransactionDbModelById(id);
+        var transactionDbModel = _context.Transactions.FirstOrDefault(t => t.Id == id);
 
         if (transactionDbModel is null)
         {
             throw new ObjectNotFoundException($"There is no transaction with such id: {id}");
         }
 
-        Transactions.Remove(transactionDbModel);
+        _context.Transactions.Remove(transactionDbModel);
     }
 }

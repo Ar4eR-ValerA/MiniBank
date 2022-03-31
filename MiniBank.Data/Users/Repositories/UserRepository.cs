@@ -1,31 +1,33 @@
-﻿using MiniBank.Core.Domain.Users;
+﻿using Microsoft.EntityFrameworkCore;
+using MiniBank.Core.Domain.Users;
 using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
+using MiniBank.Data.Contexts;
 
 namespace MiniBank.Data.Users.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private static readonly List<UserDbModel> Users = new();
+    private readonly MiniBankContext _context;
 
-    private UserDbModel GetUserDbModelById(Guid id)
+    public UserRepository(MiniBankContext context)
     {
-        return Users.FirstOrDefault(u => u.Id == id);
+        _context = context;
     }
 
     public bool IsExist(Guid id)
     {
-        return Users.Exists(u => u.Id == id);
+        return _context.Users.AsNoTracking().Any(u => u.Id == id);
     }
 
     public bool IsLoginExists(string login)
     {
-        return Users.Exists(u => u.Login == login);
+        return _context.Users.Any(u => u.Login == login);
     }
 
     public User GetById(Guid id)
     {
-        var userDbModel = GetUserDbModelById(id);
+        var userDbModel = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == id);
 
         if (userDbModel is null)
         {
@@ -42,7 +44,7 @@ public class UserRepository : IUserRepository
 
     public IEnumerable<User> GetAll()
     {
-        return Users.Select(u => new User
+        return _context.Users.AsNoTracking().Select(u => new User
         {
             Id = u.Id,
             Login = u.Login,
@@ -59,14 +61,14 @@ public class UserRepository : IUserRepository
             Email = user.Email
         };
 
-        Users.Add(userDbModel);
+        _context.Users.Add(userDbModel);
 
         return userDbModel.Id;
     }
 
     public void Update(User user)
     {
-        var userDbModel = GetUserDbModelById(user.Id);
+        var userDbModel = _context.Users.FirstOrDefault(u => u.Id == user.Id);
 
         if (userDbModel is null)
         {
@@ -79,13 +81,13 @@ public class UserRepository : IUserRepository
 
     public void Delete(Guid id)
     {
-        var userDbModel = GetUserDbModelById(id);
+        var userDbModel = _context.Users.FirstOrDefault(u => u.Id == id);
 
         if (userDbModel is null)
         {
             throw new ObjectNotFoundException($"There is no user with such id: {id}");
         }
 
-        Users.Remove(userDbModel);
+        _context.Users.Remove(userDbModel);
     }
 }

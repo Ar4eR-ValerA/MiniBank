@@ -1,21 +1,23 @@
-﻿using MiniBank.Core.Domain.Accounts;
+﻿using Microsoft.EntityFrameworkCore;
+using MiniBank.Core.Domain.Accounts;
 using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Tools;
+using MiniBank.Data.Contexts;
 
 namespace MiniBank.Data.Accounts.Repositories;
 
 public class AccountRepository : IAccountRepository
 {
-    private static readonly List<AccountDbModel> Accounts = new();
+    private readonly MiniBankContext _context;
 
-    private AccountDbModel GetAccountDbModelById(Guid id)
+    public AccountRepository(MiniBankContext context)
     {
-        return Accounts.FirstOrDefault(a => a.Id == id);
+        _context = context;
     }
 
     public Account GetById(Guid id)
     {
-        var accountDbModel = GetAccountDbModelById(id);
+        var accountDbModel = _context.Accounts.AsNoTracking().FirstOrDefault(a => a.Id == id);
 
         if (accountDbModel is null)
         {
@@ -36,7 +38,7 @@ public class AccountRepository : IAccountRepository
 
     public IEnumerable<Account> GetAll()
     {
-        return Accounts.Select(a => new Account
+        return _context.Accounts.AsNoTracking().Select(a => new Account
         {
             Id = a.Id,
             UserId = a.UserId,
@@ -61,14 +63,14 @@ public class AccountRepository : IAccountRepository
             DateClosed = account.DateClosed
         };
 
-        Accounts.Add(accountDbModel);
+        _context.Accounts.Add(accountDbModel);
 
         return accountDbModel.Id;
     }
 
     public void Update(Account account)
     {
-        var accountDbModel = GetAccountDbModelById(account.Id);
+        var accountDbModel = _context.Accounts.FirstOrDefault(a => a.Id == account.Id);
 
         if (accountDbModel is null)
         {
@@ -85,19 +87,19 @@ public class AccountRepository : IAccountRepository
 
     public void Delete(Guid id)
     {
-        var accountDbModel = GetAccountDbModelById(id);
+        var accountDbModel = _context.Accounts.FirstOrDefault(a => a.Id == id);
 
         if (accountDbModel is null)
         {
             throw new ObjectNotFoundException($"There is no account with such id: {id}");
         }
 
-        Accounts.Remove(accountDbModel);
+        _context.Accounts.Remove(accountDbModel);
     }
 
     public bool HasUserLinkedAccounts(Guid usedId)
     {
-        var accountDbModel = Accounts.FirstOrDefault(a => a.UserId == usedId);
+        var accountDbModel = _context.Accounts.AsNoTracking().FirstOrDefault(a => a.UserId == usedId);
 
         return accountDbModel is not null;
     }

@@ -28,8 +28,7 @@ namespace MiniBank.Web
             services.AddSwaggerGen();
 
             services.AddHostedService<MigrationHostedService>();
-            // TODO: Вынести в отдельную бутстрапу?
-            
+
             services
                 .AddData(Configuration)
                 .AddCore();
