@@ -24,48 +24,53 @@ public class UserService : IUserService
         _unitOfWork = unitOfWork;
     }
 
-    public User GetById(Guid id)
+    public Task<User> GetById(Guid id)
     {
         return _userRepository.GetById(id);
     }
 
-    public IEnumerable<User> GetAll()
+    public Task<IEnumerable<User>> GetAll()
     {
         return _userRepository.GetAll();
     }
 
-    public Guid Create(User user)
+    public async Task<Guid> Create(User user)
     {
-        _userValidator.ValidateAndThrow(user);
+        await _userValidator.ValidateAndThrowAsync(user);
+
+        if (await _userRepository.IsLoginExists(user.Login))
+        {
+            throw new UserFriendlyException($"There is another user with this login: {user.Login}");
+        }
 
         var userId = Guid.NewGuid();
         user.Id = userId;
 
-        _userRepository.Create(user);
-        _unitOfWork.SaveChanges();
+        await _userRepository.Create(user);
+        await _unitOfWork.SaveChangesAsync();
 
         return userId;
     }
 
-    public void Update(User user)
+    public async Task Update(User user)
     {
-        _userRepository.Update(user);
-        _unitOfWork.SaveChanges();
+        await _userRepository.Update(user);
+        await _unitOfWork.SaveChangesAsync();
     }
 
-    public void Delete(Guid id)
+    public async Task Delete(Guid id)
     {
-        if (!_userRepository.IsExist(id))
+        if (!await _userRepository.IsExist(id))
         {
             throw new UserFriendlyException($"There is no user with such id: {id}");
         }
 
-        if (_accountRepository.HasUserLinkedAccounts(id))
+        if (await _accountRepository.HasUserLinkedAccounts(id))
         {
             throw new UserFriendlyException("You can't delete user with linked accounts");
         }
 
-        _userRepository.Delete(id);
-        _unitOfWork.SaveChanges();
+        await _userRepository.Delete(id);
+        await _unitOfWork.SaveChangesAsync();
     }
 }

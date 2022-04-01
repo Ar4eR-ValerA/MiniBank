@@ -16,9 +16,9 @@ namespace MiniBank.Web.Controllers
         }
 
         [HttpGet]
-        public double ConvertRubleRate(double amount, Currency fromCurrencyCode, Currency toCurrencyCode)
+        public async Task<double> ConvertRubleRate(double amount, Currency fromCurrencyCode, Currency toCurrencyCode)
         {
-            return _currencyRateConversionService.ConvertCurrencyRate(amount, fromCurrencyCode, toCurrencyCode);
+            return await _currencyRateConversionService.ConvertCurrencyRate(amount, fromCurrencyCode, toCurrencyCode);
         }
     }
 }

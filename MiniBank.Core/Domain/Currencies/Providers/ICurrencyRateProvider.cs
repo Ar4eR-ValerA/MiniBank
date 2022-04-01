@@ -2,6 +2,6 @@
 {
     public interface ICurrencyRateProvider
     {
-        double GetCurrencyRate(Currency fromCurrencyCode, Currency toCurrencyCode);
+        Task<double> GetCurrencyRate(Currency fromCurrencyCode, Currency toCurrencyCode);
     }
 }

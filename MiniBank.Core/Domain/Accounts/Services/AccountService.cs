@@ -3,6 +3,7 @@ using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Domain.Currencies.Services;
 using MiniBank.Core.Domain.Transactions;
 using MiniBank.Core.Domain.Transactions.Repositories;
+using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
 
 namespace MiniBank.Core.Domain.Accounts.Services;
@@ -11,6 +12,7 @@ public class AccountService : IAccountService
 {
     private readonly IAccountRepository _accountRepository;
     private readonly ITransactionRepository _transactionRepository;
+    private readonly IUserRepository _userRepository;
     private readonly ICurrencyRateConversionService _currencyRateConversionService;
     private readonly IValidator<Account> _accountValidator;
     private readonly IUnitOfWork _unitOfWork;
@@ -20,12 +22,14 @@ public class AccountService : IAccountService
         ICurrencyRateConversionService currencyRateConversionService,
         ITransactionRepository transactionRepository, 
         IValidator<Account> accountValidator, 
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork, 
+        IUserRepository userRepository)
     {
         _accountRepository = accountRepository;
         _transactionRepository = transactionRepository;
         _accountValidator = accountValidator;
         _unitOfWork = unitOfWork;
+        _userRepository = userRepository;
         _currencyRateConversionService = currencyRateConversionService;
     }
 
@@ -69,34 +73,39 @@ public class AccountService : IAccountService
         }
     }
     
-    public Account GetById(Guid id)
+    public Task<Account> GetById(Guid id)
     {
         return _accountRepository.GetById(id);
     }
 
-    public IEnumerable<Account> GetAll()
+    public Task<IEnumerable<Account>> GetAll()
     {
         return _accountRepository.GetAll();
     }
 
-    public Guid Create(Account account)
+    public async Task<Guid> Create(Account account)
     {
-        _accountValidator.ValidateAndThrow(account);
-        
+        await _accountValidator.ValidateAndThrowAsync(account);
+
+        if (!await _userRepository.IsExist(account.UserId))
+        {
+            throw new UserFriendlyException($"There is no user with such id: {account.UserId}");
+        }
+
         var accountId = Guid.NewGuid();
         account.Id = accountId;
         account.DateOpened = DateTime.UtcNow;
         account.IsActive = true;
         
-        _accountRepository.Create(account);
-        _unitOfWork.SaveChanges();
+        await _accountRepository.Create(account);
+        await _unitOfWork.SaveChangesAsync();
         
         return accountId;
     }
 
-    public void Close(Guid id)
+    public async Task Close(Guid id)
     {
-        var account = _accountRepository.GetById(id);
+        var account = await _accountRepository.GetById(id);
         
         if (!account.IsActive)
         {
@@ -111,19 +120,19 @@ public class AccountService : IAccountService
         account.IsActive = false;
         account.DateClosed = DateTime.UtcNow;
 
-        _accountRepository.Update(account);
-        _unitOfWork.SaveChanges();
+        await _accountRepository.Update(account);
+        await _unitOfWork.SaveChangesAsync();
     }
 
-    public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
+    public async Task<double> CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
     {
         if (amount <= 0)
         {
             throw new UserFriendlyException("Amount must be positive");
         }
 
-        var fromAccount = _accountRepository.GetById(fromAccountId);
-        var toAccount = _accountRepository.GetById(toAccountId);
+        var fromAccount = await _accountRepository.GetById(fromAccountId);
+        var toAccount = await _accountRepository.GetById(toAccountId);
 
         if (fromAccount.UserId == toAccount.UserId)
         {
@@ -135,14 +144,14 @@ public class AccountService : IAccountService
         return commission;
     }
 
-    public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
+    public async Task<Guid> MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
     {
-        var fromAccount = _accountRepository.GetById(fromAccountId);
-        var toAccount = _accountRepository.GetById(toAccountId);
+        var fromAccount = await _accountRepository.GetById(fromAccountId);
+        var toAccount = await _accountRepository.GetById(toAccountId);
 
         double commission = CalculateCommission(amount, fromAccount, toAccount);
         double transactionAmount = amount - commission;
-        double convertedTransactionAmount = _currencyRateConversionService.ConvertCurrencyRate(
+        double convertedTransactionAmount = await _currencyRateConversionService.ConvertCurrencyRate(
             transactionAmount,
             fromAccount.Currency,
             toAccount.Currency);
@@ -152,8 +161,8 @@ public class AccountService : IAccountService
         fromAccount.Balance -= amount;
         toAccount.Balance += convertedTransactionAmount;
 
-        _accountRepository.Update(fromAccount);
-        _accountRepository.Update(toAccount);
+        await _accountRepository.Update(fromAccount);
+        await _accountRepository.Update(toAccount);
 
         var transactionId = Guid.NewGuid();
         var transaction = new Transaction
@@ -166,8 +175,8 @@ public class AccountService : IAccountService
             ToAccountId = toAccountId
         };
         
-        _transactionRepository.Create(transaction);
-        _unitOfWork.SaveChanges();
+        await _transactionRepository.Create(transaction);
+        await _unitOfWork.SaveChangesAsync();
         
         return transactionId;
     }

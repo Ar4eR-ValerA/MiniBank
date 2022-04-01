@@ -15,19 +15,19 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    public bool IsExist(Guid id)
+    public Task<bool> IsExist(Guid id)
     {
-        return _context.Users.AsNoTracking().Any(u => u.Id == id);
+        return _context.Users.AsNoTracking().AnyAsync(u => u.Id == id);
     }
 
-    public bool IsLoginExists(string login)
+    public Task<bool> IsLoginExists(string login)
     {
-        return _context.Users.Any(u => u.Login == login);
+        return _context.Users.AnyAsync(u => u.Login == login);
     }
 
-    public User GetById(Guid id)
+    public async Task<User> GetById(Guid id)
     {
-        var userDbModel = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == id);
+        var userDbModel = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
 
         if (userDbModel is null)
         {
@@ -42,17 +42,17 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public IEnumerable<User> GetAll()
+    public async Task<IEnumerable<User>> GetAll()
     {
-        return _context.Users.AsNoTracking().Select(u => new User
+        return await _context.Users.AsNoTracking().Select(u => new User
         {
             Id = u.Id,
             Login = u.Login,
             Email = u.Email
-        });
+        }).ToListAsync();
     }
 
-    public void Create(User user)
+    public async Task Create(User user)
     {
         var userDbModel = new UserDbModel
         {
@@ -61,12 +61,12 @@ public class UserRepository : IUserRepository
             Email = user.Email
         };
 
-        _context.Users.Add(userDbModel);
+        await _context.Users.AddAsync(userDbModel);
     }
 
-    public void Update(User user)
+    public async Task Update(User user)
     {
-        var userDbModel = _context.Users.FirstOrDefault(u => u.Id == user.Id);
+        var userDbModel = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
 
         if (userDbModel is null)
         {
@@ -75,11 +75,13 @@ public class UserRepository : IUserRepository
 
         userDbModel.Login = user.Login;
         userDbModel.Email = user.Email;
+
+        _context.Users.Update(userDbModel);
     }
 
-    public void Delete(Guid id)
+    public async Task Delete(Guid id)
     {
-        var userDbModel = _context.Users.FirstOrDefault(u => u.Id == id);
+        var userDbModel = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
         if (userDbModel is null)
         {

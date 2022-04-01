@@ -2,10 +2,10 @@
 
 public interface IAccountService
 {
-    Account GetById(Guid id);
-    IEnumerable<Account> GetAll();
-    Guid Create(Account account);
-    void Close(Guid id);
-    double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId);
-    Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId);
+    Task<Account> GetById(Guid id);
+    Task<IEnumerable<Account>> GetAll();
+    Task<Guid> Create(Account account);
+    Task Close(Guid id);
+    Task<double> CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId);
+    Task<Guid> MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId);
 }

@@ -17,9 +17,9 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public AccountDto GetById(Guid id)
+    public async Task<AccountDto> GetById(Guid id)
     {
-        var account = _accountService.GetById(id);
+        var account = await _accountService.GetById(id);
 
         return new AccountDto
         {
@@ -34,9 +34,9 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet]
-    public IEnumerable<AccountDto> GetAll()
+    public async Task<IEnumerable<AccountDto>> GetAll()
     {
-        var accounts = _accountService.GetAll();
+        var accounts = await _accountService.GetAll();
 
         return accounts.Select(a => new AccountDto
         {
@@ -51,7 +51,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("create")]
-    public Guid Create(AccountCreateDto accountCreateDto)
+    public async Task<Guid> Create(AccountCreateDto accountCreateDto)
     {
         var account = new Account
         {
@@ -60,24 +60,24 @@ public class AccountController : ControllerBase
             Currency = accountCreateDto.Currency
         };
 
-        return _accountService.Create(account);
+        return await _accountService.Create(account);
     }
 
     [HttpPut("close/{id:guid}")]
-    public void Close(Guid id)
+    public async Task Close(Guid id)
     {
-        _accountService.Close(id);
+        await _accountService.Close(id);
     }
 
     [HttpGet("calculate-commission")]
-    public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
+    public async Task<double> CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
     {
-        return _accountService.CalculateCommission(amount, fromAccountId, toAccountId);
+        return await _accountService.CalculateCommission(amount, fromAccountId, toAccountId);
     }
 
     [HttpPost("make-transaction")]
-    public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
+    public async Task<Guid> MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
     {
-        return _accountService.MakeTransaction(amount, fromAccountId, toAccountId);
+        return await _accountService.MakeTransaction(amount, fromAccountId, toAccountId);
     }
 }

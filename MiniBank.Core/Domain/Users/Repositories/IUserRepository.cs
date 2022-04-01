@@ -2,11 +2,11 @@
 
 public interface IUserRepository
 {
-    bool IsExist(Guid id);
-    bool IsLoginExists(string login);
-    User GetById(Guid id);
-    IEnumerable<User> GetAll();
-    void Create(User user);
-    void Update(User user);
-    void Delete(Guid id);
+    Task<bool> IsExist(Guid id);
+    Task<bool> IsLoginExists(string login);
+    Task<User> GetById(Guid id);
+    Task<IEnumerable<User>> GetAll();
+    Task Create(User user);
+    Task Update(User user);
+    Task Delete(Guid id);
 }

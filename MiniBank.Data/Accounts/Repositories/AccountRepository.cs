@@ -15,9 +15,11 @@ public class AccountRepository : IAccountRepository
         _context = context;
     }
 
-    public Account GetById(Guid id)
+    public async Task<Account> GetById(Guid id)
     {
-        var accountDbModel = _context.Accounts.AsNoTracking().FirstOrDefault(a => a.Id == id);
+        var accountDbModel = await _context.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == id);
 
         if (accountDbModel is null)
         {
@@ -36,21 +38,21 @@ public class AccountRepository : IAccountRepository
         };
     }
 
-    public IEnumerable<Account> GetAll()
+    public async Task<IEnumerable<Account>> GetAll()
     {
-        return _context.Accounts.AsNoTracking().Select(a => new Account
-        {
-            Id = a.Id,
-            UserId = a.UserId,
-            Balance = a.Balance,
-            Currency = a.Currency,
-            IsActive = a.IsActive,
-            DateOpened = a.DateOpened,
-            DateClosed = a.DateClosed
-        });
+        return await _context.Accounts.AsNoTracking().Select(a => new Account
+            {
+                Id = a.Id,
+                UserId = a.UserId,
+                Balance = a.Balance,
+                Currency = a.Currency,
+                IsActive = a.IsActive,
+                DateOpened = a.DateOpened,
+                DateClosed = a.DateClosed
+            }).ToListAsync();
     }
 
-    public void Create(Account account)
+    public async Task Create(Account account)
     {
         var accountDbModel = new AccountDbModel
         {
@@ -63,12 +65,12 @@ public class AccountRepository : IAccountRepository
             DateClosed = account.DateClosed
         };
 
-        _context.Accounts.Add(accountDbModel);
+        await _context.Accounts.AddAsync(accountDbModel);
     }
 
-    public void Update(Account account)
+    public async Task Update(Account account)
     {
-        var accountDbModel = _context.Accounts.FirstOrDefault(a => a.Id == account.Id);
+        var accountDbModel = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == account.Id);
 
         if (accountDbModel is null)
         {
@@ -81,11 +83,13 @@ public class AccountRepository : IAccountRepository
         accountDbModel.DateOpened = account.DateOpened;
         accountDbModel.IsActive = account.IsActive;
         accountDbModel.UserId = account.UserId;
+
+        _context.Accounts.Update(accountDbModel);
     }
 
-    public void Delete(Guid id)
+    public async Task Delete(Guid id)
     {
-        var accountDbModel = _context.Accounts.FirstOrDefault(a => a.Id == id);
+        var accountDbModel = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == id);
 
         if (accountDbModel is null)
         {
@@ -95,9 +99,9 @@ public class AccountRepository : IAccountRepository
         _context.Accounts.Remove(accountDbModel);
     }
 
-    public bool HasUserLinkedAccounts(Guid usedId)
+    public async Task<bool> HasUserLinkedAccounts(Guid usedId)
     {
-        var accountDbModel = _context.Accounts.AsNoTracking().FirstOrDefault(a => a.UserId == usedId);
+        var accountDbModel = await _context.Accounts.AsNoTracking().FirstOrDefaultAsync(a => a.UserId == usedId);
 
         return accountDbModel is not null;
     }

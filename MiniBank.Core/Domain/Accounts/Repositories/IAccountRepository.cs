@@ -2,10 +2,10 @@
 
 public interface IAccountRepository
 {
-    Account GetById(Guid id);
-    IEnumerable<Account> GetAll();
-    void Create(Account account);
-    void Update(Account account);
-    void Delete(Guid id);
-    bool HasUserLinkedAccounts(Guid usedId);
+    Task<Account> GetById(Guid id);
+    Task<IEnumerable<Account>> GetAll();
+    Task Create(Account account);
+    Task Update(Account account);
+    Task Delete(Guid id);
+    Task<bool> HasUserLinkedAccounts(Guid usedId);
 }

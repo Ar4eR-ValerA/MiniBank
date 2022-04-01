@@ -14,9 +14,12 @@ public class TransactionRepository : ITransactionRepository
     {
         _context = context;
     }
-    public Transaction GetById(Guid id)
+
+    public async Task<Transaction> GetById(Guid id)
     {
-        var transactionDbModel = _context.Transactions.AsNoTracking().FirstOrDefault(t => t.Id == id);
+        var transactionDbModel = await _context.Transactions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == id);
 
         if (transactionDbModel is null)
         {
@@ -34,9 +37,9 @@ public class TransactionRepository : ITransactionRepository
         };
     }
 
-    public IEnumerable<Transaction> GetAll()
+    public async Task<IEnumerable<Transaction>> GetAll()
     {
-        return _context.Transactions.AsNoTracking().Select(t => new Transaction
+        return await _context.Transactions.AsNoTracking().Select(t => new Transaction
         {
             Id = t.Id,
             Amount = t.Amount,
@@ -44,10 +47,10 @@ public class TransactionRepository : ITransactionRepository
             Currency = t.Currency,
             FromAccountId = t.FromAccountId,
             ToAccountId = t.ToAccountId
-        });
+        }).ToListAsync();
     }
 
-    public void Create(Transaction transaction)
+    public async Task Create(Transaction transaction)
     {
         var transactionDbModel = new TransactionDbModel
         {
@@ -59,12 +62,12 @@ public class TransactionRepository : ITransactionRepository
             ToAccountId = transaction.ToAccountId
         };
 
-        _context.Transactions.Add(transactionDbModel);
+        await _context.Transactions.AddAsync(transactionDbModel);
     }
 
-    public void Update(Transaction transaction)
+    public async Task Update(Transaction transaction)
     {
-        var transactionDbModel = _context.Transactions.FirstOrDefault(t => t.Id == transaction.Id);
+        var transactionDbModel = await _context.Transactions.FirstOrDefaultAsync(t => t.Id == transaction.Id);
 
         if (transactionDbModel is null)
         {
@@ -76,11 +79,13 @@ public class TransactionRepository : ITransactionRepository
         transactionDbModel.Currency = transaction.Currency;
         transactionDbModel.FromAccountId = transaction.FromAccountId;
         transactionDbModel.ToAccountId = transaction.ToAccountId;
+
+        _context.Transactions.Update(transactionDbModel);
     }
 
-    public void Delete(Guid id)
+    public async Task Delete(Guid id)
     {
-        var transactionDbModel = _context.Transactions.FirstOrDefault(t => t.Id == id);
+        var transactionDbModel = await _context.Transactions.FirstOrDefaultAsync(t => t.Id == id);
 
         if (transactionDbModel is null)
         {

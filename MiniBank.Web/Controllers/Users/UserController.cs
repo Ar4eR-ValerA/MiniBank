@@ -17,9 +17,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public UserDto GetById(Guid id)
+    public async Task<UserDto> GetById(Guid id)
     {
-        var user = _userService.GetById(id);
+        var user = await _userService.GetById(id);
 
         return new UserDto
         {
@@ -30,9 +30,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public IEnumerable<UserDto> GetAll()
+    public async Task<IEnumerable<UserDto>> GetAll()
     {
-        var users = _userService.GetAll();
+        var users = await _userService.GetAll();
 
         return users.Select(u => new UserDto
         {
@@ -43,7 +43,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("create")]
-    public Guid Create(UserCreateDto userCreateDto)
+    public async Task<Guid> Create(UserCreateDto userCreateDto)
     {
         var user = new User
         {
@@ -51,11 +51,11 @@ public class UserController : ControllerBase
             Email = userCreateDto.Email
         };
 
-        return _userService.Create(user);
+        return await _userService.Create(user);
     }
 
     [HttpPut("update/{id:guid}")]
-    public void Update(Guid id, UserUpdateDto userUpdateDto)
+    public async Task Update(Guid id, UserUpdateDto userUpdateDto)
     {
         var user = new User
         {
@@ -64,12 +64,12 @@ public class UserController : ControllerBase
             Email = userUpdateDto.Email
         };
 
-        _userService.Update(user);
+        await _userService.Update(user);
     }
 
     [HttpDelete("{id:guid}")]
-    public void Delete(Guid id)
+    public async Task Delete(Guid id)
     {
-        _userService.Delete(id);
+        await _userService.Delete(id);
     }
 }

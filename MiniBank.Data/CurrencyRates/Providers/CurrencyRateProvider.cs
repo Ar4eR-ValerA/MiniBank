@@ -15,20 +15,18 @@ namespace MiniBank.Data.CurrencyRates.Providers
             _client = httpClient;
         }
 
-        public double GetCurrencyRate(Currency fromCurrencyCode, Currency toCurrencyCode)
+        public async Task<double> GetCurrencyRate(Currency fromCurrencyCode, Currency toCurrencyCode)
         {
-            double fromCurrencyRubleRate = GetCurrencyRubleRate(fromCurrencyCode);
-            double toCurrencyRubleRate = GetCurrencyRubleRate(toCurrencyCode);
+            double fromCurrencyRubleRate = await GetCurrencyRubleRate(fromCurrencyCode);
+            double toCurrencyRubleRate = await GetCurrencyRubleRate(toCurrencyCode);
 
             return fromCurrencyRubleRate / toCurrencyRubleRate;
         }
 
-        private double GetCurrencyRubleRate(Currency currencyCode)
+        private async Task<double> GetCurrencyRubleRate(Currency currencyCode)
         {
-            CurrenciesModel response = _client
-                .GetFromJsonAsync<CurrenciesModel>("")
-                .GetAwaiter()
-                .GetResult();
+            CurrenciesModel response = await _client
+                .GetFromJsonAsync<CurrenciesModel>("");
 
             if (response is null)
             {
