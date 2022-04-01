@@ -37,7 +37,7 @@ public class TransactionRepository : ITransactionRepository
         };
     }
 
-    public async Task<IEnumerable<Transaction>> GetAll()
+    public async Task<IReadOnlyList<Transaction>> GetAll()
     {
         return await _context.Transactions.AsNoTracking().Select(t => new Transaction
         {

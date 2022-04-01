@@ -1,7 +1,6 @@
 ﻿using MiniBank.Core;
-using MiniBank.Data.Contexts;
 
-namespace MiniBank.Data;
+namespace MiniBank.Data.Contexts;
 
 public class EfUnitOfWork : IUnitOfWork
 {

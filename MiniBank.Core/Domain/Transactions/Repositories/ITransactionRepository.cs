@@ -4,7 +4,7 @@ public interface ITransactionRepository
 {
     
     Task<Transaction> GetById(Guid id);
-    Task<IEnumerable<Transaction>> GetAll();
+    Task<IReadOnlyList<Transaction>> GetAll();
     Task Create(Transaction transaction);
     Task Update(Transaction transaction);
     Task Delete(Guid id);

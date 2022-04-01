@@ -42,7 +42,7 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<IEnumerable<User>> GetAll()
+    public async Task<IReadOnlyList<User>> GetAll()
     {
         return await _context.Users.AsNoTracking().Select(u => new User
         {

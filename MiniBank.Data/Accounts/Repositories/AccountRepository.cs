@@ -38,7 +38,7 @@ public class AccountRepository : IAccountRepository
         };
     }
 
-    public async Task<IEnumerable<Account>> GetAll()
+    public async Task<IReadOnlyList<Account>> GetAll()
     {
         return await _context.Accounts.AsNoTracking().Select(a => new Account
             {

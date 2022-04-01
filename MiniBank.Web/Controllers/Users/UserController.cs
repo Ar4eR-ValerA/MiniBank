@@ -30,7 +30,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<UserDto>> GetAll()
+    public async Task<IReadOnlyList<UserDto>> GetAll()
     {
         var users = await _userService.GetAll();
 
@@ -39,7 +39,7 @@ public class UserController : ControllerBase
             Id = u.Id,
             Login = u.Login,
             Email = u.Email
-        });
+        }).ToList();
     }
 
     [HttpPost("create")]

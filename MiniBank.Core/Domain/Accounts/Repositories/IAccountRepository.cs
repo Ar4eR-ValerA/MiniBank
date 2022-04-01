@@ -3,7 +3,7 @@
 public interface IAccountRepository
 {
     Task<Account> GetById(Guid id);
-    Task<IEnumerable<Account>> GetAll();
+    Task<IReadOnlyList<Account>> GetAll();
     Task Create(Account account);
     Task Update(Account account);
     Task Delete(Guid id);

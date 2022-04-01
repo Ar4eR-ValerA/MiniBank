@@ -29,7 +29,7 @@ public class UserService : IUserService
         return _userRepository.GetById(id);
     }
 
-    public Task<IEnumerable<User>> GetAll()
+    public Task<IReadOnlyList<User>> GetAll()
     {
         return _userRepository.GetAll();
     }

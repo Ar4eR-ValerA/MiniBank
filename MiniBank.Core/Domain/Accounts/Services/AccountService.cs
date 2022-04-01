@@ -78,7 +78,7 @@ public class AccountService : IAccountService
         return _accountRepository.GetById(id);
     }
 
-    public Task<IEnumerable<Account>> GetAll()
+    public Task<IReadOnlyList<Account>> GetAll()
     {
         return _accountRepository.GetAll();
     }

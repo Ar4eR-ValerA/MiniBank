@@ -34,7 +34,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<AccountDto>> GetAll()
+    public async Task<IReadOnlyList<AccountDto>> GetAll()
     {
         var accounts = await _accountService.GetAll();
 
@@ -47,7 +47,7 @@ public class AccountController : ControllerBase
             IsActive = a.IsActive,
             DateOpened = a.DateOpened,
             DateClosed = a.DateClosed
-        });
+        }).ToList();
     }
 
     [HttpPost("create")]

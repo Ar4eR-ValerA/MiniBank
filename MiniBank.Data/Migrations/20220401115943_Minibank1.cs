@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MiniBank.Data.Migrations
 {
-    public partial class Minibank18 : Migration
+    public partial class Minibank1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
