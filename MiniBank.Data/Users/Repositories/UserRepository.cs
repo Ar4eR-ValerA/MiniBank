@@ -52,18 +52,16 @@ public class UserRepository : IUserRepository
         });
     }
 
-    public Guid Create(User user)
+    public void Create(User user)
     {
         var userDbModel = new UserDbModel
         {
-            Id = Guid.NewGuid(),
+            Id = user.Id,
             Login = user.Login,
             Email = user.Email
         };
 
         _context.Users.Add(userDbModel);
-
-        return userDbModel.Id;
     }
 
     public void Update(User user)

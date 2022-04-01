@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MiniBank.Core;
 using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Domain.Currencies.Providers;
 using MiniBank.Core.Domain.Transactions.Repositories;
@@ -25,11 +26,12 @@ public static class Bootstraps
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddDbContext<MiniBankContext>(options =>
         {
-            options.UseNpgsql("Host=localhost;Port=5432;Database=MiniBank1.0;Username=postgres;Password=123456");
+            options.UseNpgsql("Host=localhost;Port=5432;Database=MiniBank1.6;Username=postgres;Password=123456");
         });
-        
+
         return services;
     }
 }

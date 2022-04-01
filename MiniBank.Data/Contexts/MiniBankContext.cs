@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Logging;
 using MiniBank.Data.Accounts;
 using MiniBank.Data.Transactions;
 using MiniBank.Data.Users;
@@ -12,7 +12,7 @@ public class MiniBankContext : DbContext
     public DbSet<AccountDbModel> Accounts { get; set; }
     public DbSet<TransactionDbModel> Transactions { get; set; }
 
-    public MiniBankContext(DbContextOptions options)
+    public MiniBankContext(DbContextOptions<MiniBankContext> options)
         : base(options)
     {
     }
@@ -26,19 +26,7 @@ public class MiniBankContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseLazyLoadingProxies();
-        optionsBuilder.LogTo(Console.WriteLine);
+        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
         base.OnConfiguring(optionsBuilder);
-    }
-}
-
-public class Factory : IDesignTimeDbContextFactory<MiniBankContext>
-{
-    public MiniBankContext CreateDbContext(string[] args)
-    {
-        var options = new DbContextOptionsBuilder()
-            .UseNpgsql("Host=localhost;Port=5432;Database=MiniBank1.0;Username=postgres;Password=123456")
-            .Options;
-
-        return new MiniBankContext(options);
     }
 }

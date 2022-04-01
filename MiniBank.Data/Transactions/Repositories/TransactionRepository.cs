@@ -47,11 +47,11 @@ public class TransactionRepository : ITransactionRepository
         });
     }
 
-    public Guid Create(Transaction transaction)
+    public void Create(Transaction transaction)
     {
         var transactionDbModel = new TransactionDbModel
         {
-            Id = Guid.NewGuid(),
+            Id = transaction.Id,
             Amount = transaction.Amount,
             Commission = transaction.Commission,
             Currency = transaction.Currency,
@@ -60,8 +60,6 @@ public class TransactionRepository : ITransactionRepository
         };
 
         _context.Transactions.Add(transactionDbModel);
-
-        return transactionDbModel.Id;
     }
 
     public void Update(Transaction transaction)

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiniBank.Data.Migrations
 {
     [DbContext(typeof(MiniBankContext))]
-    [Migration("20220330204029_MiniBank1.2")]
-    partial class MiniBank12
+    [Migration("20220401091050_Minibank1.8")]
+    partial class Minibank18
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

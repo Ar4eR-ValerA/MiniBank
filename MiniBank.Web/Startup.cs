@@ -30,8 +30,8 @@ namespace MiniBank.Web
             services.AddHostedService<MigrationHostedService>();
 
             services
-                .AddData(Configuration)
-                .AddCore();
+                .AddCore()
+                .AddData(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

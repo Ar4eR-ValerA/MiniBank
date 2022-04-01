@@ -50,22 +50,20 @@ public class AccountRepository : IAccountRepository
         });
     }
 
-    public Guid Create(Account account)
+    public void Create(Account account)
     {
         var accountDbModel = new AccountDbModel
         {
-            Id = Guid.NewGuid(),
+            Id = account.Id,
             UserId = account.UserId,
             Balance = account.Balance,
             Currency = account.Currency,
-            IsActive = true,
-            DateOpened = DateTime.Now,
+            IsActive = account.IsActive,
+            DateOpened = account.DateOpened,
             DateClosed = account.DateClosed
         };
 
         _context.Accounts.Add(accountDbModel);
-
-        return accountDbModel.Id;
     }
 
     public void Update(Account account)

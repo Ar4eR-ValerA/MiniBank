@@ -6,7 +6,7 @@ public interface IUserRepository
     bool IsLoginExists(string login);
     User GetById(Guid id);
     IEnumerable<User> GetAll();
-    Guid Create(User user);
+    void Create(User user);
     void Update(User user);
     void Delete(Guid id);
 }

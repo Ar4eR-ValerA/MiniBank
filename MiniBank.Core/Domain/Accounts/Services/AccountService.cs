@@ -13,16 +13,19 @@ public class AccountService : IAccountService
     private readonly ITransactionRepository _transactionRepository;
     private readonly ICurrencyRateConversionService _currencyRateConversionService;
     private readonly IValidator<Account> _accountValidator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AccountService(
         IAccountRepository accountRepository,
         ICurrencyRateConversionService currencyRateConversionService,
         ITransactionRepository transactionRepository, 
-        IValidator<Account> accountValidator)
+        IValidator<Account> accountValidator, 
+        IUnitOfWork unitOfWork)
     {
         _accountRepository = accountRepository;
         _transactionRepository = transactionRepository;
         _accountValidator = accountValidator;
+        _unitOfWork = unitOfWork;
         _currencyRateConversionService = currencyRateConversionService;
     }
 
@@ -80,11 +83,15 @@ public class AccountService : IAccountService
     {
         _accountValidator.ValidateAndThrow(account);
         
-        account.Id = Guid.NewGuid();
-        account.DateOpened = DateTime.Now;
+        var accountId = Guid.NewGuid();
+        account.Id = accountId;
+        account.DateOpened = DateTime.UtcNow;
         account.IsActive = true;
-
-        return _accountRepository.Create(account);
+        
+        _accountRepository.Create(account);
+        _unitOfWork.SaveChanges();
+        
+        return accountId;
     }
 
     public void Close(Guid id)
@@ -102,9 +109,10 @@ public class AccountService : IAccountService
         }
 
         account.IsActive = false;
-        account.DateClosed = DateTime.Now;
+        account.DateClosed = DateTime.UtcNow;
 
         _accountRepository.Update(account);
+        _unitOfWork.SaveChanges();
     }
 
     public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
@@ -147,16 +155,21 @@ public class AccountService : IAccountService
         _accountRepository.Update(fromAccount);
         _accountRepository.Update(toAccount);
 
+        var transactionId = Guid.NewGuid();
         var transaction = new Transaction
         {
-            Id = Guid.NewGuid(),
+            Id = transactionId,
             Amount = transactionAmount,
             Commission = commission,
             Currency = fromAccount.Currency,
             FromAccountId = fromAccountId,
             ToAccountId = toAccountId
         };
-        return _transactionRepository.Create(transaction);
+        
+        _transactionRepository.Create(transaction);
+        _unitOfWork.SaveChanges();
+        
+        return transactionId;
     }
 
 }
