@@ -17,9 +17,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<UserDto> GetById(Guid id)
+    public async Task<UserDto> GetById(Guid id, CancellationToken cancellationToken = default)
     {
-        var user = await _userService.GetById(id);
+        var user = await _userService.GetById(id, cancellationToken);
 
         return new UserDto
         {
@@ -30,9 +30,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IReadOnlyList<UserDto>> GetAll()
+    public async Task<IReadOnlyList<UserDto>> GetAll(CancellationToken cancellationToken = default)
     {
-        var users = await _userService.GetAll();
+        var users = await _userService.GetAll(cancellationToken);
 
         return users.Select(u => new UserDto
         {
@@ -43,7 +43,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<Guid> Create(UserCreateDto userCreateDto)
+    public async Task<Guid> Create(UserCreateDto userCreateDto, CancellationToken cancellationToken = default)
     {
         var user = new User
         {
@@ -51,11 +51,11 @@ public class UserController : ControllerBase
             Email = userCreateDto.Email
         };
 
-        return await _userService.Create(user);
+        return await _userService.Create(user, cancellationToken);
     }
 
     [HttpPut("update/{id:guid}")]
-    public async Task Update(Guid id, UserUpdateDto userUpdateDto)
+    public async Task Update(Guid id, UserUpdateDto userUpdateDto, CancellationToken cancellationToken = default)
     {
         var user = new User
         {
@@ -64,12 +64,12 @@ public class UserController : ControllerBase
             Email = userUpdateDto.Email
         };
 
-        await _userService.Update(user);
+        await _userService.Update(user, cancellationToken);
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
-        await _userService.Delete(id);
+        await _userService.Delete(id, cancellationToken);
     }
 }

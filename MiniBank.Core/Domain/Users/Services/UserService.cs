@@ -24,21 +24,21 @@ public class UserService : IUserService
         _unitOfWork = unitOfWork;
     }
 
-    public Task<User> GetById(Guid id)
+    public Task<User> GetById(Guid id, CancellationToken cancellationToken)
     {
-        return _userRepository.GetById(id);
+        return _userRepository.GetById(id, cancellationToken);
     }
 
-    public Task<IReadOnlyList<User>> GetAll()
+    public Task<IReadOnlyList<User>> GetAll(CancellationToken cancellationToken)
     {
-        return _userRepository.GetAll();
+        return _userRepository.GetAll(cancellationToken);
     }
 
-    public async Task<Guid> Create(User user)
+    public async Task<Guid> Create(User user, CancellationToken cancellationToken)
     {
-        await _userValidator.ValidateAndThrowAsync(user);
+        await _userValidator.ValidateAndThrowAsync(user, cancellationToken);
 
-        if (await _userRepository.IsLoginExists(user.Login))
+        if (await _userRepository.IsLoginExists(user.Login, cancellationToken))
         {
             throw new UserFriendlyException($"There is another user with this login: {user.Login}");
         }
@@ -46,31 +46,31 @@ public class UserService : IUserService
         var userId = Guid.NewGuid();
         user.Id = userId;
 
-        await _userRepository.Create(user);
+        await _userRepository.Create(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
 
         return userId;
     }
 
-    public async Task Update(User user)
+    public async Task Update(User user, CancellationToken cancellationToken)
     {
-        await _userRepository.Update(user);
+        await _userRepository.Update(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
-        if (!await _userRepository.IsExist(id))
+        if (!await _userRepository.IsExist(id, cancellationToken))
         {
             throw new UserFriendlyException($"There is no user with such id: {id}");
         }
 
-        if (await _accountRepository.HasUserLinkedAccounts(id))
+        if (await _accountRepository.HasUserLinkedAccounts(id, cancellationToken))
         {
             throw new UserFriendlyException("You can't delete user with linked accounts");
         }
 
-        await _userRepository.Delete(id);
+        await _userRepository.Delete(id, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
     }
 }

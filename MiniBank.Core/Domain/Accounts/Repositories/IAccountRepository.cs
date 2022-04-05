@@ -2,10 +2,10 @@
 
 public interface IAccountRepository
 {
-    Task<Account> GetById(Guid id);
-    Task<IReadOnlyList<Account>> GetAll();
-    Task Create(Account account);
-    Task Update(Account account);
-    Task Delete(Guid id);
-    Task<bool> HasUserLinkedAccounts(Guid usedId);
+    Task<Account> GetById(Guid id, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Account>> GetAll(CancellationToken cancellationToken);
+    Task Create(Account account, CancellationToken cancellationToken);
+    Task Update(Account account, CancellationToken cancellationToken);
+    Task Delete(Guid id, CancellationToken cancellationToken);
+    Task<bool> HasUserLinkedAccounts(Guid usedId, CancellationToken cancellationToken);
 }

@@ -15,19 +15,21 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    public Task<bool> IsExist(Guid id)
+    public Task<bool> IsExist(Guid id, CancellationToken cancellationToken)
     {
-        return _context.Users.AsNoTracking().AnyAsync(u => u.Id == id);
+        return _context.Users.AsNoTracking().AnyAsync(u => u.Id == id, cancellationToken);
     }
 
-    public Task<bool> IsLoginExists(string login)
+    public Task<bool> IsLoginExists(string login, CancellationToken cancellationToken)
     {
-        return _context.Users.AnyAsync(u => u.Login == login);
+        return _context.Users.AnyAsync(u => u.Login == login, cancellationToken);
     }
 
-    public async Task<User> GetById(Guid id)
+    public async Task<User> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var userDbModel = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+        var userDbModel = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
         if (userDbModel is null)
         {
@@ -42,17 +44,17 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<IReadOnlyList<User>> GetAll()
+    public async Task<IReadOnlyList<User>> GetAll(CancellationToken cancellationToken)
     {
         return await _context.Users.AsNoTracking().Select(u => new User
         {
             Id = u.Id,
             Login = u.Login,
             Email = u.Email
-        }).ToListAsync();
+        }).ToListAsync(cancellationToken);
     }
 
-    public async Task Create(User user)
+    public async Task Create(User user, CancellationToken cancellationToken)
     {
         var userDbModel = new UserDbModel
         {
@@ -61,12 +63,13 @@ public class UserRepository : IUserRepository
             Email = user.Email
         };
 
-        await _context.Users.AddAsync(userDbModel);
+        await _context.Users.AddAsync(userDbModel, cancellationToken);
     }
 
-    public async Task Update(User user)
+    public async Task Update(User user, CancellationToken cancellationToken)
     {
-        var userDbModel = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
+        var userDbModel = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
 
         if (userDbModel is null)
         {
@@ -79,9 +82,9 @@ public class UserRepository : IUserRepository
         _context.Users.Update(userDbModel);
     }
 
-    public async Task Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
-        var userDbModel = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        var userDbModel = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
         if (userDbModel is null)
         {

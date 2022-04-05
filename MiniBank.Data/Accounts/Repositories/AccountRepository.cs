@@ -15,11 +15,11 @@ public class AccountRepository : IAccountRepository
         _context = context;
     }
 
-    public async Task<Account> GetById(Guid id)
+    public async Task<Account> GetById(Guid id, CancellationToken cancellationToken)
     {
         var accountDbModel = await _context.Accounts
             .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.Id == id);
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
         if (accountDbModel is null)
         {
@@ -38,21 +38,21 @@ public class AccountRepository : IAccountRepository
         };
     }
 
-    public async Task<IReadOnlyList<Account>> GetAll()
+    public async Task<IReadOnlyList<Account>> GetAll(CancellationToken cancellationToken)
     {
         return await _context.Accounts.AsNoTracking().Select(a => new Account
-            {
-                Id = a.Id,
-                UserId = a.UserId,
-                Balance = a.Balance,
-                Currency = a.Currency,
-                IsActive = a.IsActive,
-                DateOpened = a.DateOpened,
-                DateClosed = a.DateClosed
-            }).ToListAsync();
+        {
+            Id = a.Id,
+            UserId = a.UserId,
+            Balance = a.Balance,
+            Currency = a.Currency,
+            IsActive = a.IsActive,
+            DateOpened = a.DateOpened,
+            DateClosed = a.DateClosed
+        }).ToListAsync(cancellationToken);
     }
 
-    public async Task Create(Account account)
+    public async Task Create(Account account, CancellationToken cancellationToken)
     {
         var accountDbModel = new AccountDbModel
         {
@@ -65,12 +65,13 @@ public class AccountRepository : IAccountRepository
             DateClosed = account.DateClosed
         };
 
-        await _context.Accounts.AddAsync(accountDbModel);
+        await _context.Accounts.AddAsync(accountDbModel, cancellationToken);
     }
 
-    public async Task Update(Account account)
+    public async Task Update(Account account, CancellationToken cancellationToken)
     {
-        var accountDbModel = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == account.Id);
+        var accountDbModel = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.Id == account.Id, cancellationToken);
 
         if (accountDbModel is null)
         {
@@ -87,9 +88,10 @@ public class AccountRepository : IAccountRepository
         _context.Accounts.Update(accountDbModel);
     }
 
-    public async Task Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
-        var accountDbModel = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == id);
+        var accountDbModel = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
         if (accountDbModel is null)
         {
@@ -99,9 +101,11 @@ public class AccountRepository : IAccountRepository
         _context.Accounts.Remove(accountDbModel);
     }
 
-    public async Task<bool> HasUserLinkedAccounts(Guid usedId)
+    public async Task<bool> HasUserLinkedAccounts(Guid usedId, CancellationToken cancellationToken)
     {
-        var accountDbModel = await _context.Accounts.AsNoTracking().FirstOrDefaultAsync(a => a.UserId == usedId);
+        var accountDbModel = await _context.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.UserId == usedId, cancellationToken);
 
         return accountDbModel is not null;
     }

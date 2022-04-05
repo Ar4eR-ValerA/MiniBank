@@ -15,11 +15,11 @@ public class TransactionRepository : ITransactionRepository
         _context = context;
     }
 
-    public async Task<Transaction> GetById(Guid id)
+    public async Task<Transaction> GetById(Guid id, CancellationToken cancellationToken)
     {
         var transactionDbModel = await _context.Transactions
             .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id == id);
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         if (transactionDbModel is null)
         {
@@ -37,7 +37,7 @@ public class TransactionRepository : ITransactionRepository
         };
     }
 
-    public async Task<IReadOnlyList<Transaction>> GetAll()
+    public async Task<IReadOnlyList<Transaction>> GetAll(CancellationToken cancellationToken)
     {
         return await _context.Transactions.AsNoTracking().Select(t => new Transaction
         {
@@ -47,10 +47,10 @@ public class TransactionRepository : ITransactionRepository
             Currency = t.Currency,
             FromAccountId = t.FromAccountId,
             ToAccountId = t.ToAccountId
-        }).ToListAsync();
+        }).ToListAsync(cancellationToken);
     }
 
-    public async Task Create(Transaction transaction)
+    public async Task Create(Transaction transaction, CancellationToken cancellationToken)
     {
         var transactionDbModel = new TransactionDbModel
         {
@@ -62,12 +62,13 @@ public class TransactionRepository : ITransactionRepository
             ToAccountId = transaction.ToAccountId
         };
 
-        await _context.Transactions.AddAsync(transactionDbModel);
+        await _context.Transactions.AddAsync(transactionDbModel, cancellationToken);
     }
 
-    public async Task Update(Transaction transaction)
+    public async Task Update(Transaction transaction, CancellationToken cancellationToken)
     {
-        var transactionDbModel = await _context.Transactions.FirstOrDefaultAsync(t => t.Id == transaction.Id);
+        var transactionDbModel = await _context.Transactions
+            .FirstOrDefaultAsync(t => t.Id == transaction.Id, cancellationToken);
 
         if (transactionDbModel is null)
         {
@@ -83,9 +84,10 @@ public class TransactionRepository : ITransactionRepository
         _context.Transactions.Update(transactionDbModel);
     }
 
-    public async Task Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
-        var transactionDbModel = await _context.Transactions.FirstOrDefaultAsync(t => t.Id == id);
+        var transactionDbModel = await _context.Transactions
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         if (transactionDbModel is null)
         {
