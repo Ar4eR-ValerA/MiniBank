@@ -12,12 +12,4 @@ public class TransactionDbModel
     public Currency Currency { get; set; }
     public Guid FromAccountId { get; set; }
     public Guid ToAccountId { get; set; }
-    
-    internal class Map : IEntityTypeConfiguration<TransactionDbModel>
-    {
-        public void Configure(EntityTypeBuilder<TransactionDbModel> builder)
-        {
-            builder.ToTable("transaction");
-        }
-    }
 }

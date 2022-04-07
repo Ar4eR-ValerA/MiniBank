@@ -13,12 +13,4 @@ public class AccountDbModel
     public bool IsActive { get; set; }
     public DateTime DateOpened { get; set; }
     public DateTime? DateClosed { get; set; }
-
-    internal class Map : IEntityTypeConfiguration<AccountDbModel>
-    {
-        public void Configure(EntityTypeBuilder<AccountDbModel> builder)
-        {
-            builder.ToTable("account");
-        }
-    }
 }
