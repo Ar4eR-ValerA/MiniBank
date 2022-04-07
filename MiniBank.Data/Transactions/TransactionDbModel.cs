@@ -18,12 +18,6 @@ public class TransactionDbModel
         public void Configure(EntityTypeBuilder<TransactionDbModel> builder)
         {
             builder.ToTable("transaction");
-            builder.Property(t => t.Id).HasColumnName("id");
-            builder.Property(t => t.Amount).HasColumnName("amount");
-            builder.Property(t => t.Commission).HasColumnName("commission");
-            builder.Property(t => t.Currency).HasColumnName("currency");
-            builder.Property(t => t.FromAccountId).HasColumnName("from_account_id");
-            builder.Property(t => t.ToAccountId).HasColumnName("to_account_id");
         }
     }
 }

@@ -14,9 +14,6 @@ public class UserDbModel
         public void Configure(EntityTypeBuilder<UserDbModel> builder)
         {
             builder.ToTable("user");
-            builder.Property(u => u.Id).HasColumnName("id");
-            builder.Property(u => u.Login).HasColumnName("login");
-            builder.Property(u => u.Email).HasColumnName("Email");
         }
     }
 }
