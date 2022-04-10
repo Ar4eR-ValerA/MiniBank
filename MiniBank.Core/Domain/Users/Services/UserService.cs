@@ -54,6 +54,11 @@ public class UserService : IUserService
 
     public async Task Update(User user, CancellationToken cancellationToken)
     {
+        if (!await _userRepository.IsExist(user.Id, cancellationToken))
+        {
+            throw new UserFriendlyException($"There is no user with such id: {user.Id}");
+        }
+        
         await _userRepository.Update(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
     }
