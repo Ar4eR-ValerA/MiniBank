@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
@@ -8,6 +9,7 @@ using MiniBank.Core.Domain.Accounts.Services;
 using MiniBank.Core.Domain.Currencies.Services;
 using MiniBank.Core.Domain.Transactions.Repositories;
 using MiniBank.Core.Domain.Users.Repositories;
+using MiniBank.Core.Tools;
 using Moq;
 using Xunit;
 
@@ -19,8 +21,6 @@ public class AccountServiceTests
     private readonly Mock<IAccountRepository> _fakeAccountRepository;
     private readonly Mock<ICurrencyRateConversionService> _fakeCurrencyRateConversionService;
     private readonly Mock<ITransactionRepository> _fakeTransactionRepository;
-    private readonly Mock<IValidator<Account>> _fakeAccountValidator;
-    private readonly Mock<IUnitOfWork> _fakeUnitOfWork;
     private readonly Mock<IUserRepository> _fakeUserRepository;
 
     public AccountServiceTests()
@@ -28,16 +28,16 @@ public class AccountServiceTests
         _fakeAccountRepository = new Mock<IAccountRepository>();
         _fakeTransactionRepository = new Mock<ITransactionRepository>();
         _fakeCurrencyRateConversionService = new Mock<ICurrencyRateConversionService>();
-        _fakeAccountValidator = new Mock<IValidator<Account>>();
-        _fakeUnitOfWork = new Mock<IUnitOfWork>();
+        var fakeAccountValidator = new Mock<IValidator<Account>>();
+        var fakeUnitOfWork = new Mock<IUnitOfWork>();
         _fakeUserRepository = new Mock<IUserRepository>();
-        
+
         _accountService = new AccountService(
-            _fakeAccountRepository.Object, 
+            _fakeAccountRepository.Object,
             _fakeCurrencyRateConversionService.Object,
             _fakeTransactionRepository.Object,
-            _fakeAccountValidator.Object,
-            _fakeUnitOfWork.Object,
+            fakeAccountValidator.Object,
+            fakeUnitOfWork.Object,
             _fakeUserRepository.Object);
     }
 
@@ -50,7 +50,70 @@ public class AccountServiceTests
             .Returns(Task.FromResult(expectedAccount));
 
         var account = await _accountService.GetById(Guid.NewGuid(), CancellationToken.None);
-        
+
         Assert.Equal(expectedAccount, account);
-    } 
+    }
+
+    [Fact]
+    public async void GetAll_SuccessPath_AccountsReturned()
+    {
+        IReadOnlyList<Account> expectedAccounts = new List<Account>();
+
+        _fakeAccountRepository
+            .Setup(accountRepository => accountRepository.GetAll(CancellationToken.None))
+            .Returns(Task.FromResult(expectedAccounts));
+
+        var accounts = await _accountService.GetAll(CancellationToken.None);
+
+        Assert.Equal(expectedAccounts, accounts);
+    }
+
+    [Fact]
+    public async void Create_SuccessPath_CorrectAccountCreated()
+    {
+        var account = new Account();
+        _fakeUserRepository
+            .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
+            .Returns(Task.FromResult(true));
+
+        var accountId = await _accountService.Create(account, CancellationToken.None);
+
+        Assert.NotEqual(Guid.Empty, accountId);
+        Assert.Equal(DateTime.UtcNow.Date, account.DateOpened.Date);
+        Assert.True(account.IsActive);
+    }
+
+    [Fact]
+    public async void Create_NotSuchUser_ThrowUserFriendlyException()
+    {
+        var account = new Account();
+        _fakeUserRepository
+            .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
+            .Returns(Task.FromResult(false));
+
+        await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _accountService.Create(account, CancellationToken.None);
+        });
+    }
+
+    [Fact]
+    public async void Close_SuccessPath_AccountClosed()
+    {
+        var returnedAccount = new Account { IsActive = true, Balance = 0 };
+        _fakeAccountRepository
+            .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
+            .Returns(Task.FromResult(returnedAccount));
+
+        await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
+        
+        Assert.Equal(DateTime.UtcNow.Date, returnedAccount.DateClosed?.Date);
+        Assert.False(returnedAccount.IsActive);
+    }
+    
+    //TODO: Close_Throw
+    //TODO: Calculate_Success
+    //TODO: Calculate_Throw
+    //TODO: MakeTransaction_Success
+    //TODO: MakeTransaction_Throw
 }
