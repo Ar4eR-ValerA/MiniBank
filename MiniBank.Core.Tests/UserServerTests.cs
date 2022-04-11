@@ -65,6 +65,7 @@ public class UserServerTests
     {
         var user = new User();
 
+        //TODO: Мб не мокать валидатор и нормально его тестировать?
         var userId = await _userService.Create(user, CancellationToken.None);
 
         Assert.NotEqual(Guid.Empty, userId);

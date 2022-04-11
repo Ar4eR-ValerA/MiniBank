@@ -106,13 +106,67 @@ public class AccountServiceTests
             .Returns(Task.FromResult(returnedAccount));
 
         await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
-        
+
         Assert.Equal(DateTime.UtcNow.Date, returnedAccount.DateClosed?.Date);
         Assert.False(returnedAccount.IsActive);
     }
+
+    [Fact]
+    public async void Close_NotActive_ThrowUserFriendlyException()
+    {
+        var returnedAccount = new Account { IsActive = false };
+        _fakeAccountRepository
+            .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
+            .Returns(Task.FromResult(returnedAccount));
+
+        await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
+        });
+    }
+
+    [Fact]
+    public async void Close_NotZeroBalance_ThrowUserFriendlyException()
+    {
+        //TODO: Глянуть, как в лекции или мб спросить, оставлять ли магические числа такого типа
+        var returnedAccount = new Account { IsActive = true, Balance = 100 };
+        _fakeAccountRepository
+            .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
+            .Returns(Task.FromResult(returnedAccount));
+
+        await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
+        });
+    }
+
+    [Fact]
+    public async void CalculateCommission_SuccessPath_NotZeroCommission()
+    {
+        var returnedAccountFromId = Guid.NewGuid();
+        var returnedAccountToId = Guid.NewGuid();
+        var returnedAccountFrom = new Account { Id = returnedAccountFromId, UserId = Guid.NewGuid() };
+        var returnedAccountTo = new Account { Id = returnedAccountToId, UserId = Guid.NewGuid() };
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
+            .Returns(Task.FromResult(returnedAccountFrom));
+
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
+            .Returns(Task.FromResult(returnedAccountTo));
+
+        var commission = _accountService.CalculateCommission(
+            new Random().Next(1, 2),
+            //TODO: Чёт так себе идея
+            returnedAccountFromId,
+            returnedAccountToId,
+            CancellationToken.None);
+        
+        Assert.True(await commission > 0);
+    }
     
-    //TODO: Close_Throw
-    //TODO: Calculate_Success
     //TODO: Calculate_Throw
     //TODO: MakeTransaction_Success
     //TODO: MakeTransaction_Throw
