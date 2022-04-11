@@ -61,11 +61,9 @@ public class UserServerTests
     }
 
     [Fact]
-    public async void AddUser_SuccessPath_ReturnUserId()
+    public async void Create_SuccessPath_ReturnUserId()
     {
         var user = new User();
-        _fakeUserRepository
-            .Setup(userRepository => userRepository.Create(It.IsAny<User>(), CancellationToken.None));
 
         var userId = await _userService.Create(user, CancellationToken.None);
 
@@ -73,7 +71,7 @@ public class UserServerTests
     }
 
     [Fact]
-    public void AddUser_DuplicateLogin_ThrowUserFriendlyException()
+    public void Create_DuplicateLogin_ThrowUserFriendlyException()
     {
         var user = new User();
         _fakeUserRepository
@@ -87,7 +85,7 @@ public class UserServerTests
     }
 
     [Fact]
-    public async void UpdateUser_SuccessPath_NotThrow()
+    public async void Update_SuccessPath_NotThrow()
     {
         var user = new User();
         _fakeUserRepository
@@ -98,7 +96,7 @@ public class UserServerTests
     }
 
     [Fact]
-    public void UpdateUser_NoSuchUser_ThrowUserFriendlyException()
+    public void Update_NoSuchUser_ThrowUserFriendlyException()
     {
         var user = new User();
         _fakeUserRepository
@@ -112,7 +110,7 @@ public class UserServerTests
     }
 
     [Fact]
-    public async void DeleteUser_SuccessPath_NotThrow()
+    public async void Delete_SuccessPath_NotThrow()
     {
         _fakeUserRepository
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
@@ -124,11 +122,10 @@ public class UserServerTests
             .Returns(Task.FromResult(false));
 
         await _userService.Delete(Guid.NewGuid(), CancellationToken.None);
-        ;
     }
 
     [Fact]
-    public void DeleteUser_NoSuchUser_ThrowUserFriendlyException()
+    public void Delete_NoSuchUser_ThrowUserFriendlyException()
     {
         _fakeUserRepository
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
@@ -141,8 +138,11 @@ public class UserServerTests
     }
 
     [Fact]
-    public void DeleteUser_HasLinkedAccounts_ThrowUserFriendlyException()
+    public void Delete_HasLinkedAccounts_ThrowUserFriendlyException()
     {
+        _fakeUserRepository
+            .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
+            .Returns(Task.FromResult(true));
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
