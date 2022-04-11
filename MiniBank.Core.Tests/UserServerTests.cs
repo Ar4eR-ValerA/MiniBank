@@ -34,20 +34,20 @@ public class UserServerTests
     }
 
     [Fact]
-    public async void GetById_SuccessPath_ReturnedUser()
+    public async void GetById_SuccessPath_UserReturned()
     {
         var expectedUser = new User();
         _fakeUserRepository
             .Setup(userRepository => userRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(expectedUser));
 
-        var user = await _userService.GetById(Guid.NewGuid());
+        var user = await _userService.GetById(Guid.NewGuid(), CancellationToken.None);
 
         Assert.Equal(expectedUser, user);
     }
 
     [Fact]
-    public async void GetAll_SuccessPath_ReturnedUsers()
+    public async void GetAll_SuccessPath_UsersReturned()
     {
         IReadOnlyList<User> expectedUsers = new List<User>();
 
@@ -55,7 +55,7 @@ public class UserServerTests
             .Setup(userRepository => userRepository.GetAll(CancellationToken.None))
             .Returns(Task.FromResult(expectedUsers));
 
-        var users = await _userService.GetAll();
+        var users = await _userService.GetAll(CancellationToken.None);
 
         Assert.Equal(expectedUsers, users);
     }
@@ -67,7 +67,7 @@ public class UserServerTests
         _fakeUserRepository
             .Setup(userRepository => userRepository.Create(It.IsAny<User>(), CancellationToken.None));
 
-        var userId = await _userService.Create(user);
+        var userId = await _userService.Create(user, CancellationToken.None);
 
         Assert.NotEqual(Guid.Empty, userId);
     }
@@ -80,7 +80,10 @@ public class UserServerTests
             .Setup(userRepository => userRepository.IsLoginExists(It.IsAny<string>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
-        Assert.ThrowsAsync<UserFriendlyException>(async () => { await _userService.Create(user); });
+        Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _userService.Create(user, CancellationToken.None);
+        });
     }
 
     [Fact]
@@ -91,9 +94,9 @@ public class UserServerTests
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
-        await _userService.Update(user);
+        await _userService.Update(user, CancellationToken.None);
     }
-    
+
     [Fact]
     public void UpdateUser_NoSuchUser_ThrowUserFriendlyException()
     {
@@ -102,7 +105,10 @@ public class UserServerTests
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
-        Assert.ThrowsAsync<UserFriendlyException>(async () => { await _userService.Update(user); });
+        Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _userService.Update(user, CancellationToken.None);
+        });
     }
 
     [Fact]
@@ -111,15 +117,16 @@ public class UserServerTests
         _fakeUserRepository
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
-        
+
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
-        await _userService.Delete(Guid.NewGuid());;
+        await _userService.Delete(Guid.NewGuid(), CancellationToken.None);
+        ;
     }
-    
+
     [Fact]
     public void DeleteUser_NoSuchUser_ThrowUserFriendlyException()
     {
@@ -127,7 +134,10 @@ public class UserServerTests
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
-        Assert.ThrowsAsync<UserFriendlyException>(async () => { await _userService.Delete(Guid.NewGuid()); });
+        Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _userService.Delete(Guid.NewGuid(), CancellationToken.None);
+        });
     }
 
     [Fact]
@@ -138,6 +148,9 @@ public class UserServerTests
                 accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
-        Assert.ThrowsAsync<UserFriendlyException>(async () => { await _userService.Delete(Guid.NewGuid()); });
+        Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _userService.Delete(Guid.NewGuid(), CancellationToken.None);
+        });
     }
 }
