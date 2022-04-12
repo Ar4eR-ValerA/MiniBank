@@ -150,16 +150,22 @@ public class AccountServiceTests
     {
         var returnedAccountFromId = Guid.NewGuid();
         var returnedAccountToId = Guid.NewGuid();
-        var returnedAccountFrom = new Account { Id = returnedAccountFromId, UserId = userFromId };
-        var returnedAccountTo = new Account { Id = returnedAccountToId, UserId = userToId };
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(returnedAccountFrom));
+            .Returns(Task.FromResult(new Account
+            {
+                Id = returnedAccountFromId,
+                UserId = userFromId
+            }));
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
-            .Returns(Task.FromResult(returnedAccountTo));
+            .Returns(Task.FromResult(new Account
+            {
+                Id = returnedAccountToId,
+                UserId = userToId
+            }));
 
         var commission = await _accountService.CalculateCommission(
             amount,
@@ -184,16 +190,22 @@ public class AccountServiceTests
     {
         var returnedAccountFromId = Guid.NewGuid();
         var returnedAccountToId = Guid.NewGuid();
-        var returnedAccountFrom = new Account { Id = returnedAccountFromId, UserId = Guid.NewGuid() };
-        var returnedAccountTo = new Account { Id = returnedAccountToId, UserId = Guid.NewGuid() };
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(returnedAccountFrom));
+            .Returns(Task.FromResult(new Account
+            {
+                Id = returnedAccountFromId,
+                UserId = Guid.NewGuid()
+            }));
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
-            .Returns(Task.FromResult(returnedAccountTo));
+            .Returns(Task.FromResult(new Account
+            {
+                Id = returnedAccountToId,
+                UserId = Guid.NewGuid()
+            }));
 
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
@@ -205,6 +217,40 @@ public class AccountServiceTests
         });
     }
 
-    //TODO: MakeTransaction_Success
+    [Theory]
+    [InlineData(100, "0F9619FF-8B86-D011-B42D-00CF4FC964FF", 100)]
+    public async void MakeTransaction_SuccessPath_NotZeroCommission(
+        double amount,
+        Guid accountFromId,
+        double balanceFrom)
+    {
+        var accountToId = Guid.NewGuid();
+        
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountFromId,
+                UserId = Guid.NewGuid(),
+                IsActive = true,
+                Balance = balanceFrom
+            }));
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountToId,
+                IsActive = true,
+                UserId = Guid.NewGuid()
+            }));
+
+        var transactionId = 
+            await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+        
+        Assert.NotEqual(Guid.Empty, transactionId);
+    }
+    
     //TODO: MakeTransaction_Throw
 }
