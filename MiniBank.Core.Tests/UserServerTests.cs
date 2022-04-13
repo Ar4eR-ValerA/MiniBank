@@ -37,6 +37,7 @@ public class UserServerTests
     public async void GetById_SuccessPath_UserReturned()
     {
         var expectedUser = new User();
+        
         _fakeUserRepository
             .Setup(userRepository => userRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(expectedUser));
@@ -64,8 +65,7 @@ public class UserServerTests
     public async void Create_SuccessPath_ReturnUserId()
     {
         var user = new User();
-
-        //TODO: Мб не мокать валидатор и нормально его тестировать?
+        
         var userId = await _userService.Create(user, CancellationToken.None);
 
         Assert.NotEqual(Guid.Empty, userId);
@@ -75,6 +75,7 @@ public class UserServerTests
     public void Create_DuplicateLogin_ThrowUserFriendlyException()
     {
         var user = new User();
+        
         _fakeUserRepository
             .Setup(userRepository => userRepository.IsLoginExists(It.IsAny<string>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
@@ -89,6 +90,7 @@ public class UserServerTests
     public async void Update_SuccessPath_NotThrow()
     {
         var user = new User();
+        
         _fakeUserRepository
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
@@ -100,6 +102,7 @@ public class UserServerTests
     public void Update_NoSuchUser_ThrowUserFriendlyException()
     {
         var user = new User();
+        
         _fakeUserRepository
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));

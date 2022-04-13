@@ -6,6 +6,7 @@ using FluentValidation;
 using MiniBank.Core.Domain.Accounts;
 using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Domain.Accounts.Services;
+using MiniBank.Core.Domain.Currencies;
 using MiniBank.Core.Domain.Currencies.Services;
 using MiniBank.Core.Domain.Transactions.Repositories;
 using MiniBank.Core.Domain.Users.Repositories;
@@ -20,13 +21,12 @@ public class AccountServiceTests
     private readonly IAccountService _accountService;
     private readonly Mock<IAccountRepository> _fakeAccountRepository;
     private readonly Mock<ICurrencyRateConversionService> _fakeCurrencyRateConversionService;
-    private readonly Mock<ITransactionRepository> _fakeTransactionRepository;
     private readonly Mock<IUserRepository> _fakeUserRepository;
 
     public AccountServiceTests()
     {
         _fakeAccountRepository = new Mock<IAccountRepository>();
-        _fakeTransactionRepository = new Mock<ITransactionRepository>();
+        var fakeTransactionRepository = new Mock<ITransactionRepository>();
         _fakeCurrencyRateConversionService = new Mock<ICurrencyRateConversionService>();
         var fakeAccountValidator = new Mock<IValidator<Account>>();
         var fakeUnitOfWork = new Mock<IUnitOfWork>();
@@ -35,7 +35,7 @@ public class AccountServiceTests
         _accountService = new AccountService(
             _fakeAccountRepository.Object,
             _fakeCurrencyRateConversionService.Object,
-            _fakeTransactionRepository.Object,
+            fakeTransactionRepository.Object,
             fakeAccountValidator.Object,
             fakeUnitOfWork.Object,
             _fakeUserRepository.Object);
@@ -130,6 +130,7 @@ public class AccountServiceTests
     public async void Close_NotZeroBalance_ThrowUserFriendlyException(double balance)
     {
         var returnedAccount = new Account { IsActive = true, Balance = balance };
+
         _fakeAccountRepository
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(returnedAccount));
@@ -141,15 +142,15 @@ public class AccountServiceTests
     }
 
     [Theory]
-    [InlineData(100, "0F9619FF-8B86-D011-B42D-00CF4FC964FF", "5F9619FF-8B86-D011-B42D-00CF4FC964FF")]
-    [InlineData(100, "0F9619FF-8B86-D011-B42D-00CF4FC964FF", "0F9619FF-8B86-D011-B42D-00CF4FC964FF")]
-    public async void CalculateCommission_SuccessPath_NotZeroCommission(
-        double amount,
-        Guid userFromId,
-        Guid userToId)
+    [InlineData(100)]
+    public async void CalculateCommission_SuccessPathDifferentUsers_NotZeroCommission(double amount)
     {
+        var userFromId = Guid.NewGuid();
+        var userToId = Guid.NewGuid();
+
         var returnedAccountFromId = Guid.NewGuid();
         var returnedAccountToId = Guid.NewGuid();
+
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
@@ -166,6 +167,13 @@ public class AccountServiceTests
                 Id = returnedAccountToId,
                 UserId = userToId
             }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
 
         var commission = await _accountService.CalculateCommission(
             amount,
@@ -173,14 +181,49 @@ public class AccountServiceTests
             returnedAccountToId,
             CancellationToken.None);
 
-        if (userFromId == userToId)
-        {
-            Assert.Equal(0, commission);
-        }
-        else
-        {
-            Assert.NotEqual(0, commission);
-        }
+        Assert.NotEqual(0, commission);
+    }
+
+    [Theory]
+    [InlineData(100)]
+    public async void CalculateCommission_SuccessPathSameUser_ZeroCommission(double amount)
+    {
+        var userId = Guid.NewGuid();
+
+        var returnedAccountFromId = Guid.NewGuid();
+        var returnedAccountToId = Guid.NewGuid();
+
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = returnedAccountFromId,
+                UserId = userId
+            }));
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = returnedAccountToId,
+                UserId = userId
+            }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
+
+        var commission = await _accountService.CalculateCommission(
+            amount,
+            returnedAccountFromId,
+            returnedAccountToId,
+            CancellationToken.None);
+
+        Assert.Equal(0, commission);
     }
 
     [Theory]
@@ -190,6 +233,7 @@ public class AccountServiceTests
     {
         var returnedAccountFromId = Guid.NewGuid();
         var returnedAccountToId = Guid.NewGuid();
+
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
@@ -206,6 +250,13 @@ public class AccountServiceTests
                 Id = returnedAccountToId,
                 UserId = Guid.NewGuid()
             }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
 
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
@@ -218,14 +269,206 @@ public class AccountServiceTests
     }
 
     [Theory]
-    [InlineData(100, "0F9619FF-8B86-D011-B42D-00CF4FC964FF", 100)]
-    public async void MakeTransaction_SuccessPath_NotZeroCommission(
-        double amount,
-        Guid accountFromId,
-        double balanceFrom)
+    [InlineData(100)]
+    public async void MakeTransaction_SuccessPath_TransactionMade(double amount)
     {
         var accountToId = Guid.NewGuid();
-        
+        var accountFromId = Guid.NewGuid();
+
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountFromId,
+                UserId = Guid.NewGuid(),
+                IsActive = true,
+                Balance = amount
+            }));
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountToId,
+                IsActive = true,
+                UserId = Guid.NewGuid()
+            }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
+
+        var transactionId = await _accountService
+            .MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+
+        Assert.NotEqual(Guid.Empty, transactionId);
+    }
+
+    [Theory]
+    [InlineData(-20)]
+    [InlineData(0)]
+    public async void MakeTransaction_InvalidAmount_ThrowUserFriendlyException(double amount)
+    {
+        var accountFromId = Guid.NewGuid();
+        var accountToId = Guid.NewGuid();
+
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountFromId,
+                UserId = Guid.NewGuid(),
+                IsActive = true,
+                Balance = amount
+            }));
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountToId,
+                IsActive = true,
+                UserId = Guid.NewGuid(),
+            }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
+
+        await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+        });
+    }
+
+    [Theory]
+    [InlineData(100)]
+    public async void MakeTransaction_SameAccount_ThrowUserFriendlyException(double amount)
+    {
+        var userId = Guid.NewGuid();
+        var accountId = Guid.NewGuid();
+
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountId,
+                UserId = userId,
+                IsActive = true,
+                Balance = amount
+            }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
+
+        await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _accountService.MakeTransaction(amount, accountId, accountId, CancellationToken.None);
+        });
+    }
+
+    [Theory]
+    [InlineData(100)]
+    public async void MakeTransaction_SenderIsNotActive_ThrowUserFriendlyException(double amount)
+    {
+        var accountFromId = Guid.NewGuid();
+        var accountToId = Guid.NewGuid();
+
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountFromId,
+                UserId = Guid.NewGuid(),
+                IsActive = false,
+                Balance = amount
+            }));
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountToId,
+                IsActive = true,
+                UserId = Guid.NewGuid(),
+            }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
+
+        await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+        });
+    }
+
+    [Theory]
+    [InlineData(100)]
+    public async void MakeTransaction_ReceiverIsNotActive_ThrowUserFriendlyException(double amount)
+    {
+        var accountFromId = Guid.NewGuid();
+        var accountToId = Guid.NewGuid();
+
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountFromId,
+                UserId = Guid.NewGuid(),
+                IsActive = true,
+                Balance = amount
+            }));
+        _fakeAccountRepository
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
+            .Returns(Task.FromResult(new Account
+            {
+                Id = accountToId,
+                IsActive = false,
+                UserId = Guid.NewGuid(),
+            }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
+
+        await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
+            await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+        });
+    }
+
+    [Theory]
+    [InlineData(100, 20)]
+    public async void MakeTransaction_NegativeBalanceAfterTransaction_ThrowUserFriendlyException(
+        double amount,
+        double balanceFrom)
+    {
+        var accountFromId = Guid.NewGuid();
+        var accountToId = Guid.NewGuid();
+
         _fakeAccountRepository
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
@@ -242,15 +485,20 @@ public class AccountServiceTests
             .Returns(Task.FromResult(new Account
             {
                 Id = accountToId,
-                IsActive = true,
-                UserId = Guid.NewGuid()
+                IsActive = false,
+                UserId = Guid.NewGuid(),
             }));
+        _fakeCurrencyRateConversionService
+            .Setup(currencyRateConversionService =>
+                currencyRateConversionService.ConvertCurrencyRate(
+                    It.IsAny<double>(), 
+                    It.IsAny<Currency>(),
+                    It.IsAny<Currency>()))
+            .Returns(Task.FromResult(amount));
 
-        var transactionId = 
+        await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+        {
             await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
-        
-        Assert.NotEqual(Guid.Empty, transactionId);
+        });
     }
-    
-    //TODO: MakeTransaction_Throw
 }

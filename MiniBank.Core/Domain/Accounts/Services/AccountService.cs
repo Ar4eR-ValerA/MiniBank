@@ -52,7 +52,7 @@ public class AccountService : IAccountService
             throw new UserFriendlyException("Accounts must be different");
         }
 
-        if (amount < 0)
+        if (amount <= 0)
         {
             throw new UserFriendlyException("Transaction amount must be positive");
         }
