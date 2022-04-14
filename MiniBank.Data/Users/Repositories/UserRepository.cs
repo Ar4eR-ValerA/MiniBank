@@ -1,26 +1,35 @@
-﻿using MiniBank.Core.Domain.Users;
+﻿using Microsoft.EntityFrameworkCore;
+using MiniBank.Core.Domain.Users;
 using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
+using MiniBank.Data.Contexts;
 
 namespace MiniBank.Data.Users.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private static readonly List<UserDbModel> Users = new();
+    private readonly MiniBankContext _context;
 
-    private UserDbModel GetUserDbModelById(Guid id)
+    public UserRepository(MiniBankContext context)
     {
-        return Users.FirstOrDefault(u => u.Id == id);
+        _context = context;
     }
 
-    public bool IsExist(Guid id)
+    public Task<bool> IsExist(Guid id, CancellationToken cancellationToken)
     {
-        return Users.Exists(u => u.Id == id);
+        return _context.Users.AsNoTracking().AnyAsync(u => u.Id == id, cancellationToken);
     }
 
-    public User GetById(Guid id)
+    public Task<bool> IsLoginExists(string login, CancellationToken cancellationToken)
     {
-        var userDbModel = GetUserDbModelById(id);
+        return _context.Users.AnyAsync(u => u.Login == login, cancellationToken);
+    }
+
+    public async Task<User> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        var userDbModel = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
         if (userDbModel is null)
         {
@@ -35,33 +44,32 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public IEnumerable<User> GetAll()
+    public async Task<IReadOnlyList<User>> GetAll(CancellationToken cancellationToken)
     {
-        return Users.Select(u => new User
+        return await _context.Users.AsNoTracking().Select(u => new User
         {
             Id = u.Id,
-            Login = u.Login, 
+            Login = u.Login,
             Email = u.Email
-        });
+        }).ToListAsync(cancellationToken);
     }
 
-    public Guid Create(User user)
+    public async Task Create(User user, CancellationToken cancellationToken)
     {
         var userDbModel = new UserDbModel
         {
-            Id = Guid.NewGuid(),
+            Id = user.Id,
             Login = user.Login,
             Email = user.Email
         };
 
-        Users.Add(userDbModel);
-
-        return userDbModel.Id;
+        await _context.Users.AddAsync(userDbModel, cancellationToken);
     }
 
-    public void Update(User user)
+    public async Task Update(User user, CancellationToken cancellationToken)
     {
-        var userDbModel = GetUserDbModelById(user.Id);
+        var userDbModel = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
 
         if (userDbModel is null)
         {
@@ -70,17 +78,19 @@ public class UserRepository : IUserRepository
 
         userDbModel.Login = user.Login;
         userDbModel.Email = user.Email;
+
+        _context.Users.Update(userDbModel);
     }
 
-    public void Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
-        var userDbModel = GetUserDbModelById(id);
+        var userDbModel = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
         if (userDbModel is null)
         {
             throw new ObjectNotFoundException($"There is no user with such id: {id}");
         }
 
-        Users.Remove(userDbModel);
+        _context.Users.Remove(userDbModel);
     }
 }

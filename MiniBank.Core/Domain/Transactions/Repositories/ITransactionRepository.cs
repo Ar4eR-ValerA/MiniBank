@@ -3,9 +3,9 @@
 public interface ITransactionRepository
 {
     
-    Transaction GetById(Guid id);
-    IEnumerable<Transaction> GetAll();
-    Guid Create(Transaction transaction);
-    void Update(Transaction transaction);
-    void Delete(Guid id);
+    Task<Transaction> GetById(Guid id, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Transaction>> GetAll(CancellationToken cancellationToken);
+    Task Create(Transaction transaction, CancellationToken cancellationToken);
+    Task Update(Transaction transaction, CancellationToken cancellationToken);
+    Task Delete(Guid id, CancellationToken cancellationToken);
 }

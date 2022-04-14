@@ -1,4 +1,5 @@
-﻿using MiniBank.Core.Domain.Accounts.Repositories;
+﻿using FluentValidation;
+using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Domain.Currencies.Services;
 using MiniBank.Core.Domain.Transactions;
 using MiniBank.Core.Domain.Transactions.Repositories;
@@ -10,108 +11,132 @@ namespace MiniBank.Core.Domain.Accounts.Services;
 public class AccountService : IAccountService
 {
     private readonly IAccountRepository _accountRepository;
-    private readonly IUserRepository _userRepository;
     private readonly ITransactionRepository _transactionRepository;
+    private readonly IUserRepository _userRepository;
     private readonly ICurrencyRateConversionService _currencyRateConversionService;
+    private readonly IValidator<Account> _accountValidator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AccountService(
         IAccountRepository accountRepository,
-        IUserRepository userRepository,
         ICurrencyRateConversionService currencyRateConversionService,
-        ITransactionRepository transactionRepository)
+        ITransactionRepository transactionRepository,
+        IValidator<Account> accountValidator,
+        IUnitOfWork unitOfWork,
+        IUserRepository userRepository)
     {
         _accountRepository = accountRepository;
-        _userRepository = userRepository;
         _transactionRepository = transactionRepository;
+        _accountValidator = accountValidator;
+        _unitOfWork = unitOfWork;
+        _userRepository = userRepository;
         _currencyRateConversionService = currencyRateConversionService;
     }
 
-    private void ThrowIfTransactionInvalid(double amount, Account fromAccount, Account toAccount)
+    private double CalculateCommission(double amount, Account fromAccount, Account toAccount)
+    {
+        if (fromAccount.UserId == toAccount.UserId)
+        {
+            return 0;
+        }
+
+        double commission = Math.Round(amount * 0.02, 2);
+
+        return commission;
+    }
+
+    private void ValidateTransactionAndThrow(double amount, Account fromAccount, Account toAccount)
     {
         if (fromAccount.Id == toAccount.Id)
         {
-            throw new ValidationException("Accounts must be different");
+            throw new UserFriendlyException("Accounts must be different");
         }
 
         if (amount < 0)
         {
-            throw new ValidationException("Transaction amount must be positive");
+            throw new UserFriendlyException("Transaction amount must be positive");
         }
-        
+
         if (!fromAccount.IsActive)
         {
-            throw new ValidationException("Sender is not active");
+            throw new UserFriendlyException("Sender is not active");
         }
-        
+
         if (!toAccount.IsActive)
         {
-            throw new ValidationException("Receiver is not active");
+            throw new UserFriendlyException("Receiver is not active");
         }
 
         if (fromAccount.Balance - amount < 0)
         {
-            throw new ValidationException("Balance will be negative after operation");
+            throw new UserFriendlyException("Balance will be negative after operation");
         }
-    }
-    
-    public Account GetById(Guid id)
-    {
-        return _accountRepository.GetById(id);
     }
 
-    public IEnumerable<Account> GetAll()
+    public Task<Account> GetById(Guid id, CancellationToken cancellationToken)
     {
-        return _accountRepository.GetAll();
+        return _accountRepository.GetById(id, cancellationToken);
     }
 
-    public Guid Create(Account account)
+    public Task<IReadOnlyList<Account>> GetAll(CancellationToken cancellationToken)
     {
-        if (!_userRepository.IsExist(account.UserId))
+        return _accountRepository.GetAll(cancellationToken);
+    }
+
+    public async Task<Guid> Create(Account account, CancellationToken cancellationToken)
+    {
+        await _accountValidator.ValidateAndThrowAsync(account, cancellationToken);
+
+        if (!await _userRepository.IsExist(account.UserId, cancellationToken))
         {
-            throw new ValidationException($"There is no user with such id: {account.UserId}");
+            throw new UserFriendlyException($"There is no user with such id: {account.UserId}");
         }
-        
-        if (account.Balance < 0)
-        {
-            throw new ValidationException("Balance of account can't be negative");
-        }
-        
-        account.Id = Guid.NewGuid();
-        account.DateOpened = DateTime.Now;
+
+        var accountId = Guid.NewGuid();
+        account.Id = accountId;
+        account.DateOpened = DateTime.UtcNow;
         account.IsActive = true;
 
-        return _accountRepository.Create(account);
+        await _accountRepository.Create(account, cancellationToken);
+        await _unitOfWork.SaveChangesAsync();
+
+        return accountId;
     }
 
-    public void Close(Guid id)
+    public async Task Close(Guid id, CancellationToken cancellationToken)
     {
-        var account = _accountRepository.GetById(id);
-        
+        var account = await _accountRepository.GetById(id, cancellationToken);
+
         if (!account.IsActive)
         {
-            throw new ValidationException("Account is already closed");
+            throw new UserFriendlyException("Account is already closed");
         }
 
         if (account.Balance != 0)
         {
-            throw new ValidationException("You can't close account with no zero balance");
+            throw new UserFriendlyException("You can't close account with no zero balance");
         }
 
         account.IsActive = false;
-        account.DateClosed = DateTime.Now;
+        account.DateClosed = DateTime.UtcNow;
 
-        _accountRepository.Update(account);
+        await _accountRepository.Update(account, cancellationToken);
+        await _unitOfWork.SaveChangesAsync();
     }
 
-    public double CalculateCommission(double amount, Guid fromAccountId, Guid toAccountId)
+    public async Task<double> CalculateCommission(
+        double amount, 
+        Guid fromAccountId, 
+        Guid toAccountId,
+        CancellationToken cancellationToken)
     {
         if (amount <= 0)
         {
-            throw new ValidationException("Amount must be positive");
+            throw new UserFriendlyException("Amount must be positive");
         }
 
-        var fromAccount = _accountRepository.GetById(fromAccountId);
-        var toAccount = _accountRepository.GetById(toAccountId);
+        var fromAccount = await _accountRepository.GetById(fromAccountId, cancellationToken);
+        var toAccount = await _accountRepository.GetById(toAccountId, cancellationToken);
 
         if (fromAccount.UserId == toAccount.UserId)
         {
@@ -123,35 +148,44 @@ public class AccountService : IAccountService
         return commission;
     }
 
-    public Guid MakeTransaction(double amount, Guid fromAccountId, Guid toAccountId)
+    public async Task<Guid> MakeTransaction(
+        double amount,
+        Guid fromAccountId,
+        Guid toAccountId,
+        CancellationToken cancellationToken)
     {
-        var fromAccount = _accountRepository.GetById(fromAccountId);
-        var toAccount = _accountRepository.GetById(toAccountId);
+        var fromAccount = await _accountRepository.GetById(fromAccountId, cancellationToken);
+        var toAccount = await _accountRepository.GetById(toAccountId, cancellationToken);
 
-        ThrowIfTransactionInvalid(amount, fromAccount, toAccount);
-
-        double commission = CalculateCommission(amount, fromAccountId, toAccountId);
+        double commission = CalculateCommission(amount, fromAccount, toAccount);
         double transactionAmount = amount - commission;
-        double convertedTransactionAmount = _currencyRateConversionService.ConvertCurrencyRate(
+        double convertedTransactionAmount = await _currencyRateConversionService.ConvertCurrencyRate(
             transactionAmount,
             fromAccount.Currency,
             toAccount.Currency);
 
+        ValidateTransactionAndThrow(transactionAmount, fromAccount, toAccount);
+
         fromAccount.Balance -= amount;
         toAccount.Balance += convertedTransactionAmount;
 
-        _accountRepository.Update(fromAccount);
-        _accountRepository.Update(toAccount);
+        await _accountRepository.Update(fromAccount, cancellationToken);
+        await _accountRepository.Update(toAccount, cancellationToken);
 
+        var transactionId = Guid.NewGuid();
         var transaction = new Transaction
         {
-            Id = Guid.NewGuid(),
+            Id = transactionId,
             Amount = transactionAmount,
             Commission = commission,
             Currency = fromAccount.Currency,
             FromAccountId = fromAccountId,
             ToAccountId = toAccountId
         };
-        return _transactionRepository.Create(transaction);
+
+        await _transactionRepository.Create(transaction, cancellationToken);
+        await _unitOfWork.SaveChangesAsync();
+
+        return transactionId;
     }
 }

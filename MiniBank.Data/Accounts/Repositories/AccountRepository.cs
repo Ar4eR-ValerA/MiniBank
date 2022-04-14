@@ -1,21 +1,25 @@
-﻿using MiniBank.Core.Domain.Accounts;
+﻿using Microsoft.EntityFrameworkCore;
+using MiniBank.Core.Domain.Accounts;
 using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Tools;
+using MiniBank.Data.Contexts;
 
 namespace MiniBank.Data.Accounts.Repositories;
 
 public class AccountRepository : IAccountRepository
 {
-    private static readonly List<AccountDbModel> Accounts = new();
+    private readonly MiniBankContext _context;
 
-    private AccountDbModel GetAccountDbModelById(Guid id)
+    public AccountRepository(MiniBankContext context)
     {
-        return Accounts.FirstOrDefault(a => a.Id == id);
+        _context = context;
     }
 
-    public Account GetById(Guid id)
+    public async Task<Account> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var accountDbModel = GetAccountDbModelById(id);
+        var accountDbModel = await _context.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
         if (accountDbModel is null)
         {
@@ -34,9 +38,9 @@ public class AccountRepository : IAccountRepository
         };
     }
 
-    public IEnumerable<Account> GetAll()
+    public async Task<IReadOnlyList<Account>> GetAll(CancellationToken cancellationToken)
     {
-        return Accounts.Select(a => new Account
+        return await _context.Accounts.AsNoTracking().Select(a => new Account
         {
             Id = a.Id,
             UserId = a.UserId,
@@ -45,30 +49,29 @@ public class AccountRepository : IAccountRepository
             IsActive = a.IsActive,
             DateOpened = a.DateOpened,
             DateClosed = a.DateClosed
-        });
+        }).ToListAsync(cancellationToken);
     }
 
-    public Guid Create(Account account)
+    public async Task Create(Account account, CancellationToken cancellationToken)
     {
         var accountDbModel = new AccountDbModel
         {
-            Id = Guid.NewGuid(),
+            Id = account.Id,
             UserId = account.UserId,
             Balance = account.Balance,
             Currency = account.Currency,
-            IsActive = true,
-            DateOpened = DateTime.Now,
+            IsActive = account.IsActive,
+            DateOpened = account.DateOpened,
             DateClosed = account.DateClosed
         };
 
-        Accounts.Add(accountDbModel);
-
-        return accountDbModel.Id;
+        await _context.Accounts.AddAsync(accountDbModel, cancellationToken);
     }
 
-    public void Update(Account account)
+    public async Task Update(Account account, CancellationToken cancellationToken)
     {
-        var accountDbModel = GetAccountDbModelById(account.Id);
+        var accountDbModel = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.Id == account.Id, cancellationToken);
 
         if (accountDbModel is null)
         {
@@ -81,24 +84,26 @@ public class AccountRepository : IAccountRepository
         accountDbModel.DateOpened = account.DateOpened;
         accountDbModel.IsActive = account.IsActive;
         accountDbModel.UserId = account.UserId;
+
+        _context.Accounts.Update(accountDbModel);
     }
 
-    public void Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
-        var accountDbModel = GetAccountDbModelById(id);
+        var accountDbModel = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
         if (accountDbModel is null)
         {
             throw new ObjectNotFoundException($"There is no account with such id: {id}");
         }
 
-        Accounts.Remove(accountDbModel);
+        _context.Accounts.Remove(accountDbModel);
     }
 
-    public bool HasUserLinkedAccounts(Guid usedId)
+    public async Task<bool> HasUserLinkedAccounts(Guid usedId, CancellationToken cancellationToken)
     {
-        var accountDbModel = Accounts.FirstOrDefault(a => a.UserId == usedId);
-
-        return accountDbModel is not null;
+        return await _context.Accounts
+            .AnyAsync(a => a.UserId == usedId, cancellationToken);
     }
 }

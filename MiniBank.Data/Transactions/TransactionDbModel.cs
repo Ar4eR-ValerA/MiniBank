@@ -1,4 +1,6 @@
-﻿using MiniBank.Core.Domain.Currencies;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MiniBank.Core.Domain.Currencies;
 
 namespace MiniBank.Data.Transactions;
 
@@ -10,4 +12,12 @@ public class TransactionDbModel
     public Currency Currency { get; set; }
     public Guid FromAccountId { get; set; }
     public Guid ToAccountId { get; set; }
+}
+
+internal class Map : IEntityTypeConfiguration<TransactionDbModel>
+{
+    public void Configure(EntityTypeBuilder<TransactionDbModel> builder)
+    {
+        builder.ToTable("transaction");
+    }
 }

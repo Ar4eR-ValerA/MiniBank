@@ -1,18 +1,19 @@
 ﻿using System.Text.Json.Serialization;
 using MiniBank.Core;
 using MiniBank.Data;
+using MiniBank.Web.HostedServices;
 using MiniBank.Web.Middlewares;
 
 namespace MiniBank.Web
 {
     public class Startup
     {
-        private readonly IConfiguration _configuration;
-
         public Startup(IConfiguration configuration)
         {
-            _configuration = configuration;
+            Configuration = configuration;
         }
+        
+        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -26,8 +27,11 @@ namespace MiniBank.Web
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
-            services.AddData(_configuration);
-            services.AddCore();
+            services.AddHostedService<MigrationHostedService>();
+
+            services
+                .AddCore()
+                .AddData(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -35,7 +39,6 @@ namespace MiniBank.Web
             app.UseRouting();
 
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<UserFriendlyExceptionMiddleware>();
 
             if (env.IsDevelopment())
             {

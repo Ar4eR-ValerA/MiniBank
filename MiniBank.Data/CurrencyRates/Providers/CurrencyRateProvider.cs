@@ -15,20 +15,18 @@ namespace MiniBank.Data.CurrencyRates.Providers
             _client = httpClient;
         }
 
-        public double GetCurrencyRate(Currency fromCurrencyCode, Currency toCurrencyCode)
+        public async Task<double> GetCurrencyRate(Currency fromCurrencyCode, Currency toCurrencyCode)
         {
-            double fromCurrencyRubleRate = GetCurrencyRubleRate(fromCurrencyCode);
-            double toCurrencyRubleRate = GetCurrencyRubleRate(toCurrencyCode);
+            double fromCurrencyRubleRate = await GetCurrencyRubleRate(fromCurrencyCode);
+            double toCurrencyRubleRate = await GetCurrencyRubleRate(toCurrencyCode);
 
             return fromCurrencyRubleRate / toCurrencyRubleRate;
         }
 
-        private double GetCurrencyRubleRate(Currency currencyCode)
+        private async Task<double> GetCurrencyRubleRate(Currency currencyCode)
         {
-            CurrenciesModel response = _client
-                .GetFromJsonAsync<CurrenciesModel>("")
-                .GetAwaiter()
-                .GetResult();
+            CurrenciesModel response = await _client
+                .GetFromJsonAsync<CurrenciesModel>("/daily_json.js");
 
             if (response is null)
             {
@@ -42,7 +40,7 @@ namespace MiniBank.Data.CurrencyRates.Providers
             
             if (!response.Valute.ContainsKey(currencyCode.ToString()))
             {
-                throw new ValidationException($"There is no such currency code: {currencyCode}");
+                throw new Exception($"There is no such currency code: {currencyCode}");
             }
 
             CurrencyModel currency = response.Valute[currencyCode.ToString()];

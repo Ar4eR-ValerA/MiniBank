@@ -17,9 +17,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public UserDto GetById(Guid id)
+    public async Task<UserDto> GetById(Guid id, CancellationToken cancellationToken = default)
     {
-        var user = _userService.GetById(id);
+        var user = await _userService.GetById(id, cancellationToken);
 
         return new UserDto
         {
@@ -30,20 +30,20 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public IEnumerable<UserDto> GetAll()
+    public async Task<IReadOnlyList<UserDto>> GetAll(CancellationToken cancellationToken = default)
     {
-        var users = _userService.GetAll();
+        var users = await _userService.GetAll(cancellationToken);
 
         return users.Select(u => new UserDto
         {
             Id = u.Id,
             Login = u.Login,
             Email = u.Email
-        });
+        }).ToList();
     }
 
     [HttpPost("create")]
-    public Guid Create(UserCreateDto userCreateDto)
+    public Task<Guid> Create(UserCreateDto userCreateDto, CancellationToken cancellationToken = default)
     {
         var user = new User
         {
@@ -51,11 +51,11 @@ public class UserController : ControllerBase
             Email = userCreateDto.Email
         };
 
-        return _userService.Create(user);
+        return _userService.Create(user, cancellationToken);
     }
 
     [HttpPut("update/{id:guid}")]
-    public void Update(Guid id, UserUpdateDto userUpdateDto)
+    public Task Update(Guid id, UserUpdateDto userUpdateDto, CancellationToken cancellationToken = default)
     {
         var user = new User
         {
@@ -64,12 +64,12 @@ public class UserController : ControllerBase
             Email = userUpdateDto.Email
         };
 
-        _userService.Update(user);
+        return _userService.Update(user, cancellationToken);
     }
 
     [HttpDelete("{id:guid}")]
-    public void Delete(Guid id)
+    public Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
-        _userService.Delete(id);
+        return _userService.Delete(id, cancellationToken);
     }
 }

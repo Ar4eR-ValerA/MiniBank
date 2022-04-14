@@ -1,21 +1,25 @@
-﻿using MiniBank.Core.Domain.Transactions;
+﻿using Microsoft.EntityFrameworkCore;
+using MiniBank.Core.Domain.Transactions;
 using MiniBank.Core.Domain.Transactions.Repositories;
 using MiniBank.Core.Tools;
+using MiniBank.Data.Contexts;
 
 namespace MiniBank.Data.Transactions.Repositories;
 
 public class TransactionRepository : ITransactionRepository
 {
-    private static readonly List<TransactionDbModel> Transactions = new();
+    private readonly MiniBankContext _context;
 
-    private TransactionDbModel GetTransactionDbModelById(Guid id)
+    public TransactionRepository(MiniBankContext context)
     {
-        return Transactions.FirstOrDefault(t => t.Id == id);
+        _context = context;
     }
 
-    public Transaction GetById(Guid id)
+    public async Task<Transaction> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var transactionDbModel = GetTransactionDbModelById(id);
+        var transactionDbModel = await _context.Transactions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         if (transactionDbModel is null)
         {
@@ -33,9 +37,9 @@ public class TransactionRepository : ITransactionRepository
         };
     }
 
-    public IEnumerable<Transaction> GetAll()
+    public async Task<IReadOnlyList<Transaction>> GetAll(CancellationToken cancellationToken)
     {
-        return Transactions.Select(t => new Transaction
+        return await _context.Transactions.AsNoTracking().Select(t => new Transaction
         {
             Id = t.Id,
             Amount = t.Amount,
@@ -43,14 +47,14 @@ public class TransactionRepository : ITransactionRepository
             Currency = t.Currency,
             FromAccountId = t.FromAccountId,
             ToAccountId = t.ToAccountId
-        });
+        }).ToListAsync(cancellationToken);
     }
 
-    public Guid Create(Transaction transaction)
+    public async Task Create(Transaction transaction, CancellationToken cancellationToken)
     {
         var transactionDbModel = new TransactionDbModel
         {
-            Id = Guid.NewGuid(),
+            Id = transaction.Id,
             Amount = transaction.Amount,
             Commission = transaction.Commission,
             Currency = transaction.Currency,
@@ -58,14 +62,13 @@ public class TransactionRepository : ITransactionRepository
             ToAccountId = transaction.ToAccountId
         };
 
-        Transactions.Add(transactionDbModel);
-
-        return transactionDbModel.Id;
+        await _context.Transactions.AddAsync(transactionDbModel, cancellationToken);
     }
 
-    public void Update(Transaction transaction)
+    public async Task Update(Transaction transaction, CancellationToken cancellationToken)
     {
-        var transactionDbModel = GetTransactionDbModelById(transaction.Id);
+        var transactionDbModel = await _context.Transactions
+            .FirstOrDefaultAsync(t => t.Id == transaction.Id, cancellationToken);
 
         if (transactionDbModel is null)
         {
@@ -77,17 +80,20 @@ public class TransactionRepository : ITransactionRepository
         transactionDbModel.Currency = transaction.Currency;
         transactionDbModel.FromAccountId = transaction.FromAccountId;
         transactionDbModel.ToAccountId = transaction.ToAccountId;
+
+        _context.Transactions.Update(transactionDbModel);
     }
 
-    public void Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
-        var transactionDbModel = GetTransactionDbModelById(id);
+        var transactionDbModel = await _context.Transactions
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         if (transactionDbModel is null)
         {
             throw new ObjectNotFoundException($"There is no transaction with such id: {id}");
         }
 
-        Transactions.Remove(transactionDbModel);
+        _context.Transactions.Remove(transactionDbModel);
     }
 }
