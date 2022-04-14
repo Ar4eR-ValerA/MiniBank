@@ -13,3 +13,11 @@ public class TransactionDbModel
     public Guid FromAccountId { get; set; }
     public Guid ToAccountId { get; set; }
 }
+
+internal class Map : IEntityTypeConfiguration<TransactionDbModel>
+{
+    public void Configure(EntityTypeBuilder<TransactionDbModel> builder)
+    {
+        builder.ToTable("transaction");
+    }
+}

@@ -54,9 +54,9 @@ namespace MiniBank.Data.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_accounts");
+                        .HasName("pk_account");
 
-                    b.ToTable("accounts", (string)null);
+                    b.ToTable("account", (string)null);
                 });
 
             modelBuilder.Entity("MiniBank.Data.Transactions.TransactionDbModel", b =>
@@ -87,9 +87,9 @@ namespace MiniBank.Data.Migrations
                         .HasColumnName("to_account_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_transactions");
+                        .HasName("pk_transaction");
 
-                    b.ToTable("transactions", (string)null);
+                    b.ToTable("transaction", (string)null);
                 });
 
             modelBuilder.Entity("MiniBank.Data.Users.UserDbModel", b =>
@@ -108,9 +108,9 @@ namespace MiniBank.Data.Migrations
                         .HasColumnName("login");
 
                     b.HasKey("Id")
-                        .HasName("pk_users");
+                        .HasName("pk_user");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("user", (string)null);
                 });
 #pragma warning restore 612, 618
         }
