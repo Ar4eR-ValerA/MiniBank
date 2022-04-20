@@ -100,10 +100,9 @@ public class AccountServiceTests
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.Create(account, CancellationToken.None);
         });
     }
@@ -134,10 +133,9 @@ public class AccountServiceTests
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(returnedAccount));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
         });
     }
@@ -153,10 +151,9 @@ public class AccountServiceTests
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(returnedAccount));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
         });
     }
@@ -288,10 +285,9 @@ public class AccountServiceTests
                     It.IsAny<Currency>()))
             .Returns(Task.FromResult(amount));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.CalculateCommission(
                 amount,
                 returnedAccountFromId,
@@ -381,10 +377,9 @@ public class AccountServiceTests
                     It.IsAny<Currency>()))
             .Returns(Task.FromResult(amount));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
         });
     }
@@ -416,10 +411,9 @@ public class AccountServiceTests
                     It.IsAny<Currency>()))
             .Returns(Task.FromResult(amount));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.MakeTransaction(amount, accountId, accountId, CancellationToken.None);
         });
     }
@@ -460,10 +454,9 @@ public class AccountServiceTests
                     It.IsAny<Currency>()))
             .Returns(Task.FromResult(amount));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
         });
     }
@@ -504,10 +497,9 @@ public class AccountServiceTests
                     It.IsAny<Currency>()))
             .Returns(Task.FromResult(amount));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
         });
     }
@@ -550,10 +542,9 @@ public class AccountServiceTests
                     It.IsAny<Currency>()))
             .Returns(Task.FromResult(amount));
 
-        // ASSERT
+        // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
         });
     }

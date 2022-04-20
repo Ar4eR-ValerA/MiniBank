@@ -23,12 +23,12 @@ public class AccountValidatorTests
         // ARRANGE
         var account = new Account
         {
-            Balance = balance, 
-            Currency = currency, 
-            DateOpened = DateTime.UtcNow, 
+            Balance = balance,
+            Currency = currency,
+            DateOpened = DateTime.UtcNow,
             DateClosed = DateTime.UtcNow,
             Id = Guid.NewGuid(),
-            IsActive = isActive, 
+            IsActive = isActive,
             UserId = Guid.NewGuid()
         };
 
@@ -43,11 +43,7 @@ public class AccountValidatorTests
         // ARRANGE
         var account = new Account { Balance = balance };
 
-        // ASSERT
-        Assert.Throws<ValidationException>(() =>
-        {
-            // ACT
-            _validator.ValidateAndThrow(account);
-        });
+        // ACT, ASSERT
+        Assert.Throws<ValidationException>(() => _validator.ValidateAndThrow(account));
     }
 }

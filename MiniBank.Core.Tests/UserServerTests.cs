@@ -90,10 +90,9 @@ public class UserServerTests
             .Setup(userRepository => userRepository.IsLoginExists(It.IsAny<string>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
-        // ASSERT
+        // ACT, ASSERT
         Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _userService.Create(user, CancellationToken.None);
         });
     }
@@ -122,10 +121,9 @@ public class UserServerTests
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
-        // ASSERT
+        // ACT, ASSERT
         Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _userService.Update(user, CancellationToken.None);
         });
     }
@@ -155,10 +153,9 @@ public class UserServerTests
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
-        // ASSERT
+        // ACT, ASSERT
         Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _userService.Delete(Guid.NewGuid(), CancellationToken.None);
         });
     }
@@ -175,10 +172,9 @@ public class UserServerTests
                 accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
-        // ASSERT
+        // ACT, ASSERT
         Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            // ACT
             await _userService.Delete(Guid.NewGuid(), CancellationToken.None);
         });
     }
