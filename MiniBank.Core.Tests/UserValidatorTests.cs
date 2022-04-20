@@ -19,25 +19,39 @@ public class UserValidatorTests
     [InlineData("TestLogin", "TestEmail")]
     public void Validate_SuccessPath_NotThrow(string login, string email)
     {
+        // ARRANGE
         var user = new User { Login = login, Email = email, Id = Guid.NewGuid()};
 
+        // ACT, ASSERT
         _validator.ValidateAndThrow(user);
     }
 
     [Fact]
     public void Validate_EmptyLogin_ThrowValidationException()
     {
+        // ARRANGE
         var user = new User { Login = string.Empty };
 
-        Assert.Throws<ValidationException>(() => _validator.ValidateAndThrow(user));
+        // ASSERT
+        Assert.Throws<ValidationException>(() =>
+        {
+            // ACT
+            _validator.ValidateAndThrow(user);
+        });
     }
     
     [Theory]
-    [InlineData("qwertyuityuooppasdfdfgnghvdaferwget")]
+    [InlineData("string with length greater than 20")]
     public void Validate_Over20LengthLogin_ThrowValidationException(string login)
     {
+        // ARRANGE
         var user = new User { Login = login };
 
-        Assert.Throws<ValidationException>(() => _validator.ValidateAndThrow(user));
+        // ASSERT
+        Assert.Throws<ValidationException>(() =>
+        {
+            // ACT
+            _validator.ValidateAndThrow(user);
+        });
     }
 }

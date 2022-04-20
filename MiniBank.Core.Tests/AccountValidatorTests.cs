@@ -20,6 +20,7 @@ public class AccountValidatorTests
     [InlineData(100, Currency.RUB, true)]
     public void Validate_SuccessPath_NotThrow(double balance, Currency currency, bool isActive)
     {
+        // ARRANGE
         var account = new Account
         {
             Balance = balance, 
@@ -31,6 +32,7 @@ public class AccountValidatorTests
             UserId = Guid.NewGuid()
         };
 
+        // ACT, ASSERT
         _validator.ValidateAndThrow(account);
     }
 
@@ -38,8 +40,14 @@ public class AccountValidatorTests
     [InlineData(-100)]
     public void Validate_NegativeBalance_ThrowValidationException(double balance)
     {
+        // ARRANGE
         var account = new Account { Balance = balance };
 
-        Assert.Throws<ValidationException>(() => _validator.ValidateAndThrow(account));
+        // ASSERT
+        Assert.Throws<ValidationException>(() =>
+        {
+            // ACT
+            _validator.ValidateAndThrow(account);
+        });
     }
 }
