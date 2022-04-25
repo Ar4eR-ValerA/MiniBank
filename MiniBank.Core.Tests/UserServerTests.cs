@@ -16,21 +16,21 @@ namespace MiniBank.Core.Tests;
 public class UserServerTests
 {
     private readonly IUserService _userService;
-    private readonly Mock<IUserRepository> _fakeUserRepository;
-    private readonly Mock<IAccountRepository> _fakeAccountRepository;
+    private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IAccountRepository> _accountRepositoryMock;
 
     public UserServerTests()
     {
-        _fakeUserRepository = new Mock<IUserRepository>();
-        _fakeAccountRepository = new Mock<IAccountRepository>();
-        var fakeUserValidator = new Mock<IValidator<User>>();
-        var fakeUnitOfWork = new Mock<IUnitOfWork>();
+        _userRepositoryMock = new Mock<IUserRepository>();
+        _accountRepositoryMock = new Mock<IAccountRepository>();
+        var userValidatorMock = new Mock<IValidator<User>>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         _userService = new UserService(
-            _fakeUserRepository.Object,
-            _fakeAccountRepository.Object,
-            fakeUserValidator.Object,
-            fakeUnitOfWork.Object);
+            _userRepositoryMock.Object,
+            _accountRepositoryMock.Object,
+            userValidatorMock.Object,
+            unitOfWorkMock.Object);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class UserServerTests
         // ARRANGE
         var expectedUser = new User();
         
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(expectedUser));
 
@@ -56,7 +56,7 @@ public class UserServerTests
         // ARRANGE
         IReadOnlyList<User> expectedUsers = new List<User>();
         
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.GetAll(CancellationToken.None))
             .Returns(Task.FromResult(expectedUsers));
 
@@ -86,7 +86,7 @@ public class UserServerTests
         // ARRANGE
         var user = new User();
         
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.IsLoginExists(It.IsAny<string>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
@@ -103,7 +103,7 @@ public class UserServerTests
         // ARRANGE
         var user = new User();
         
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
@@ -117,7 +117,7 @@ public class UserServerTests
         // ARRANGE
         var user = new User();
         
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
@@ -132,11 +132,11 @@ public class UserServerTests
     public async void Delete_SuccessPath_NotThrow()
     {
         // ARRANGE
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
@@ -149,7 +149,7 @@ public class UserServerTests
     public void Delete_NoSuchUser_ThrowUserFriendlyException()
     {
         // ARRANGE
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
@@ -164,10 +164,10 @@ public class UserServerTests
     public void Delete_HasLinkedAccounts_ThrowUserFriendlyException()
     {
         // ARRANGE
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));

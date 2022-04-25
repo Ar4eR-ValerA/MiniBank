@@ -19,26 +19,26 @@ namespace MiniBank.Core.Tests;
 public class AccountServiceTests
 {
     private readonly IAccountService _accountService;
-    private readonly Mock<IAccountRepository> _fakeAccountRepository;
-    private readonly Mock<ICurrencyRateConversionService> _fakeCurrencyRateConversionService;
-    private readonly Mock<IUserRepository> _fakeUserRepository;
+    private readonly Mock<IAccountRepository> _accountRepositoryMock;
+    private readonly Mock<ICurrencyRateConversionService> _currencyRateConversionServiceMock;
+    private readonly Mock<IUserRepository> _userRepositoryMock;
 
     public AccountServiceTests()
     {
-        _fakeAccountRepository = new Mock<IAccountRepository>();
-        var fakeTransactionRepository = new Mock<ITransactionRepository>();
-        _fakeCurrencyRateConversionService = new Mock<ICurrencyRateConversionService>();
-        var fakeAccountValidator = new Mock<IValidator<Account>>();
-        var fakeUnitOfWork = new Mock<IUnitOfWork>();
-        _fakeUserRepository = new Mock<IUserRepository>();
+        _accountRepositoryMock = new Mock<IAccountRepository>();
+        var transactionRepositoryMock = new Mock<ITransactionRepository>();
+        _currencyRateConversionServiceMock = new Mock<ICurrencyRateConversionService>();
+        var accountValidatorMock = new Mock<IValidator<Account>>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        _userRepositoryMock = new Mock<IUserRepository>();
 
         _accountService = new AccountService(
-            _fakeAccountRepository.Object,
-            _fakeCurrencyRateConversionService.Object,
-            fakeTransactionRepository.Object,
-            fakeAccountValidator.Object,
-            fakeUnitOfWork.Object,
-            _fakeUserRepository.Object);
+            _accountRepositoryMock.Object,
+            _currencyRateConversionServiceMock.Object,
+            transactionRepositoryMock.Object,
+            accountValidatorMock.Object,
+            unitOfWorkMock.Object,
+            _userRepositoryMock.Object);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class AccountServiceTests
     {
         // ARRANGE
         var expectedAccount = new Account();
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(expectedAccount));
 
@@ -62,7 +62,7 @@ public class AccountServiceTests
     {
         // ARRANGE
         IReadOnlyList<Account> expectedAccounts = new List<Account>();
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetAll(CancellationToken.None))
             .Returns(Task.FromResult(expectedAccounts));
 
@@ -78,7 +78,7 @@ public class AccountServiceTests
     {
         // ARRANGE
         var account = new Account();
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
 
@@ -96,7 +96,7 @@ public class AccountServiceTests
     {
         // ARRANGE
         var account = new Account();
-        _fakeUserRepository
+        _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
 
@@ -112,7 +112,7 @@ public class AccountServiceTests
     {
         // ARRANGE
         var returnedAccount = new Account { IsActive = true, Balance = 0 };
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(returnedAccount));
 
@@ -129,7 +129,7 @@ public class AccountServiceTests
     {
         // ARRANGE
         var returnedAccount = new Account { IsActive = false };
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(returnedAccount));
 
@@ -147,7 +147,7 @@ public class AccountServiceTests
         // ARRANGE
         var returnedAccount = new Account { IsActive = true, Balance = balance };
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(returnedAccount));
 
@@ -169,7 +169,7 @@ public class AccountServiceTests
         var returnedAccountFromId = Guid.NewGuid();
         var returnedAccountToId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -177,7 +177,7 @@ public class AccountServiceTests
                 Id = returnedAccountFromId,
                 UserId = userFromId
             }));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -186,7 +186,7 @@ public class AccountServiceTests
                 UserId = userToId
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
@@ -215,7 +215,7 @@ public class AccountServiceTests
         var returnedAccountFromId = Guid.NewGuid();
         var returnedAccountToId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -223,7 +223,7 @@ public class AccountServiceTests
                 Id = returnedAccountFromId,
                 UserId = userId
             }));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -232,7 +232,7 @@ public class AccountServiceTests
                 UserId = userId
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
@@ -260,7 +260,7 @@ public class AccountServiceTests
         var returnedAccountFromId = Guid.NewGuid();
         var returnedAccountToId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -268,7 +268,7 @@ public class AccountServiceTests
                 Id = returnedAccountFromId,
                 UserId = Guid.NewGuid()
             }));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -277,7 +277,7 @@ public class AccountServiceTests
                 UserId = Guid.NewGuid()
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
@@ -304,7 +304,7 @@ public class AccountServiceTests
         var accountToId = Guid.NewGuid();
         var accountFromId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -314,7 +314,7 @@ public class AccountServiceTests
                 IsActive = true,
                 Balance = amount
             }));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -324,7 +324,7 @@ public class AccountServiceTests
                 UserId = Guid.NewGuid()
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
@@ -349,7 +349,7 @@ public class AccountServiceTests
         var accountFromId = Guid.NewGuid();
         var accountToId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -359,7 +359,7 @@ public class AccountServiceTests
                 IsActive = true,
                 Balance = amount
             }));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -369,7 +369,7 @@ public class AccountServiceTests
                 UserId = Guid.NewGuid(),
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
@@ -392,7 +392,7 @@ public class AccountServiceTests
         var userId = Guid.NewGuid();
         var accountId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -403,7 +403,7 @@ public class AccountServiceTests
                 Balance = amount
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
@@ -426,7 +426,7 @@ public class AccountServiceTests
         var accountFromId = Guid.NewGuid();
         var accountToId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -436,7 +436,7 @@ public class AccountServiceTests
                 IsActive = false,
                 Balance = amount
             }));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -446,7 +446,7 @@ public class AccountServiceTests
                 UserId = Guid.NewGuid(),
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
@@ -469,7 +469,7 @@ public class AccountServiceTests
         var accountFromId = Guid.NewGuid();
         var accountToId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -479,7 +479,7 @@ public class AccountServiceTests
                 IsActive = true,
                 Balance = amount
             }));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -489,7 +489,7 @@ public class AccountServiceTests
                 UserId = Guid.NewGuid(),
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
@@ -514,7 +514,7 @@ public class AccountServiceTests
         var accountFromId = Guid.NewGuid();
         var accountToId = Guid.NewGuid();
 
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -524,7 +524,7 @@ public class AccountServiceTests
                 IsActive = true,
                 Balance = balanceFrom
             }));
-        _fakeAccountRepository
+        _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
             .Returns(Task.FromResult(new Account
@@ -534,7 +534,7 @@ public class AccountServiceTests
                 UserId = Guid.NewGuid(),
             }));
         
-        _fakeCurrencyRateConversionService
+        _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
                     It.IsAny<double>(), 
