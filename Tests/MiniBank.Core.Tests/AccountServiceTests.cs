@@ -7,6 +7,7 @@ using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Domain.Accounts.Services;
 using MiniBank.Core.Domain.Currencies;
 using MiniBank.Core.Domain.Currencies.Services;
+using MiniBank.Core.Domain.Transactions;
 using MiniBank.Core.Domain.Transactions.Repositories;
 using MiniBank.Core.Domain.Users.Repositories;
 using MiniBank.Core.Tools;
@@ -20,12 +21,13 @@ public class AccountServiceTests
     private readonly IAccountService _accountService;
     private readonly Mock<IAccountRepository> _accountRepositoryMock;
     private readonly Mock<ICurrencyRateConversionService> _currencyRateConversionServiceMock;
+    private readonly Mock<ITransactionRepository> _transactionRepositoryMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
 
     public AccountServiceTests()
     {
         _accountRepositoryMock = new Mock<IAccountRepository>();
-        var transactionRepositoryMock = new Mock<ITransactionRepository>();
+        _transactionRepositoryMock = new Mock<ITransactionRepository>();
         _currencyRateConversionServiceMock = new Mock<ICurrencyRateConversionService>();
         var accountValidatorMock = new Mock<IValidator<Account>>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -34,7 +36,7 @@ public class AccountServiceTests
         _accountService = new AccountService(
             _accountRepositoryMock.Object,
             _currencyRateConversionServiceMock.Object,
-            transactionRepositoryMock.Object,
+            _transactionRepositoryMock.Object,
             accountValidatorMock.Object,
             unitOfWorkMock.Object,
             _userRepositoryMock.Object);
@@ -44,50 +46,120 @@ public class AccountServiceTests
     public async void GetById_SuccessPath_AccountReturned()
     {
         // ARRANGE
-        var expectedAccount = new Account();
+        var expectedId = Guid.NewGuid();
+        var expectedUserId = Guid.NewGuid();
+        var expectedDateOpened = DateTime.UtcNow;
+        var expectedBalance = 100;
+        var expectedCurrency = Currency.EUR;
+        var expectedIsActive = true;
+        var expectedDateClosed = DateTime.UtcNow;
+
+        var returnedAccount = new Account
+        {
+            Id = expectedId,
+            UserId = expectedUserId,
+            DateOpened = expectedDateOpened,
+            Balance = expectedBalance,
+            Currency = expectedCurrency,
+            IsActive = expectedIsActive,
+            DateClosed = expectedDateClosed
+        };
         _accountRepositoryMock
-            .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
-            .ReturnsAsync(expectedAccount);
+            .Setup(accountRepository =>
+                accountRepository.GetById(It.Is<Guid>(id => id == expectedId), CancellationToken.None))
+            .ReturnsAsync(returnedAccount);
 
         // ACT
         var account = await _accountService.GetById(Guid.NewGuid(), CancellationToken.None);
 
         // ASSERT
-        Assert.Equal(expectedAccount, account);
+        Assert.Equal(returnedAccount, account);
+        Assert.Equal(expectedId, account.Id);
+        Assert.Equal(expectedUserId, account.UserId);
+        Assert.Equal(expectedDateOpened, account.DateOpened);
+        Assert.Equal(expectedBalance, account.Balance);
+        Assert.Equal(expectedCurrency, account.Currency);
+        Assert.Equal(expectedIsActive, account.IsActive);
+        Assert.Equal(expectedDateClosed, account.DateClosed);
     }
 
     [Fact]
     public async void GetAll_SuccessPath_AccountsReturned()
     {
         // ARRANGE
-        IReadOnlyList<Account> expectedAccounts = new List<Account>();
+        var expectedId = Guid.NewGuid();
+        var expectedUserId = Guid.NewGuid();
+        var expectedDateOpened = DateTime.UtcNow;
+        var expectedBalance = 100;
+        var expectedCurrency = Currency.EUR;
+        var expectedIsActive = true;
+        var expectedDateClosed = DateTime.UtcNow;
+
+        IReadOnlyList<Account> returnedAccounts = new List<Account>
+        {
+            new()
+            {
+                Id = expectedId,
+                UserId = expectedUserId,
+                DateOpened = expectedDateOpened,
+                Balance = expectedBalance,
+                Currency = expectedCurrency,
+                IsActive = expectedIsActive,
+                DateClosed = expectedDateClosed
+            }
+        };
         _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetAll(CancellationToken.None))
-            .ReturnsAsync(expectedAccounts);
+            .ReturnsAsync(returnedAccounts);
 
         // ACT
         var accounts = await _accountService.GetAll(CancellationToken.None);
 
         // ASSERT
-        Assert.Equal(expectedAccounts, accounts);
+        Assert.Equal(returnedAccounts, accounts);
+        Assert.Equal(returnedAccounts.Count, accounts.Count);
+        Assert.Equal(expectedId, accounts[0].Id);
+        Assert.Equal(expectedUserId, accounts[0].UserId);
+        Assert.Equal(expectedDateOpened, accounts[0].DateOpened);
+        Assert.Equal(expectedBalance, accounts[0].Balance);
+        Assert.Equal(expectedCurrency, accounts[0].Currency);
+        Assert.Equal(expectedIsActive, accounts[0].IsActive);
+        Assert.Equal(expectedDateClosed, accounts[0].DateClosed);
     }
 
     [Fact]
     public async void Create_SuccessPath_CorrectAccountCreated()
     {
         // ARRANGE
-        var account = new Account();
+        var expectedUserId = Guid.NewGuid();
+        var expectedDateOpened = DateTime.UtcNow.Date;
+        var expectedBalance = 100;
+        var expectedCurrency = Currency.EUR;
+        var expectedIsActive = true;
+        DateTime? expectedDateClosed = null;
+
+        var returnedAccount = new Account
+        {
+            UserId = expectedUserId,
+            Balance = expectedBalance,
+            Currency = expectedCurrency,
+        };
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .ReturnsAsync(true);
 
         // ACT
-        var accountId = await _accountService.Create(account, CancellationToken.None);
+        var accountId = await _accountService.Create(returnedAccount, CancellationToken.None);
 
         // ASSERT
+        Assert.NotEqual(Guid.Empty, returnedAccount.Id);
         Assert.NotEqual(Guid.Empty, accountId);
-        Assert.Equal(DateTime.UtcNow.Date, account.DateOpened.Date);
-        Assert.True(account.IsActive);
+        Assert.Equal(expectedUserId, returnedAccount.UserId);
+        Assert.Equal(expectedDateOpened, returnedAccount.DateOpened.Date);
+        Assert.Equal(expectedBalance, returnedAccount.Balance);
+        Assert.Equal(expectedCurrency, returnedAccount.Currency);
+        Assert.Equal(expectedIsActive, returnedAccount.IsActive);
+        Assert.Equal(expectedDateClosed, returnedAccount.DateClosed);
     }
 
     [Fact]
@@ -110,7 +182,24 @@ public class AccountServiceTests
     public async void Close_SuccessPath_AccountClosed()
     {
         // ARRANGE
-        var returnedAccount = new Account { IsActive = true, Balance = 0 };
+        var expectedId = Guid.NewGuid();
+        var expectedUserId = Guid.NewGuid();
+        var expectedDateOpened = DateTime.UtcNow.Date;
+        var expectedBalance = 0;
+        var expectedCurrency = Currency.USD;
+        var returnedIsActive = true;
+        var expectedIsActive = false;
+        var expectedDateClosed = DateTime.UtcNow.Date;
+
+        var returnedAccount = new Account
+        {
+            Id = expectedId,
+            UserId = expectedUserId,
+            DateOpened = expectedDateOpened,
+            Balance = expectedBalance,
+            Currency = expectedCurrency,
+            IsActive = returnedIsActive
+        };
         _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .ReturnsAsync(returnedAccount);
@@ -119,8 +208,13 @@ public class AccountServiceTests
         await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
 
         // ASSERT
-        Assert.Equal(DateTime.UtcNow.Date, returnedAccount.DateClosed?.Date);
-        Assert.False(returnedAccount.IsActive);
+        Assert.Equal(expectedId, returnedAccount.Id);
+        Assert.Equal(expectedUserId, returnedAccount.UserId);
+        Assert.Equal(expectedDateOpened, returnedAccount.DateOpened);
+        Assert.Equal(expectedBalance, returnedAccount.Balance);
+        Assert.Equal(expectedCurrency, returnedAccount.Currency);
+        Assert.Equal(expectedIsActive, returnedAccount.IsActive);
+        Assert.Equal(expectedDateClosed, returnedAccount.DateClosed?.Date);
     }
 
     [Fact]
@@ -162,7 +256,8 @@ public class AccountServiceTests
     public async void CalculateCommission_SuccessPathDifferentUsers_NotZeroCommission()
     {
         // ARRANGE
-        const double positiveAmount = 100;
+        double positiveAmount = 100;
+        var expectedCommission = Math.Round(positiveAmount * 0.02, 2);
 
         var userFromId = Guid.NewGuid();
         var userToId = Guid.NewGuid();
@@ -203,14 +298,14 @@ public class AccountServiceTests
             CancellationToken.None);
 
         // ASSERT
-        Assert.NotEqual(0, commission);
+        Assert.Equal(expectedCommission, commission);
     }
 
     [Fact]
     public async void CalculateCommission_SuccessPathSameUser_ZeroCommission()
     {
         // ARRANGE
-        const double positiveAmount = 100;
+        double positiveAmount = 100;
 
         var userId = Guid.NewGuid();
 
@@ -302,7 +397,10 @@ public class AccountServiceTests
     public async void MakeTransaction_SuccessPath_TransactionMade()
     {
         // ARRANGE
-        const double positiveAmount = 100;
+        var amount = 100;
+        var expectedCurrency = Currency.EUR;
+        var expectedCommission = Math.Round(amount * 0.02, 2);
+        var expectedAmount = amount - expectedCommission;
 
         var accountToId = Guid.NewGuid();
         var accountFromId = Guid.NewGuid();
@@ -315,7 +413,8 @@ public class AccountServiceTests
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
-                Balance = positiveAmount
+                Currency = expectedCurrency,
+                Balance = amount
             });
         _accountRepositoryMock
             .Setup(accountRepository =>
@@ -324,6 +423,7 @@ public class AccountServiceTests
             {
                 Id = accountToId,
                 IsActive = true,
+                Currency = expectedCurrency,
                 UserId = Guid.NewGuid()
             });
 
@@ -333,14 +433,25 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .ReturnsAsync(positiveAmount);
+            .ReturnsAsync(amount);
+
+        _transactionRepositoryMock.Setup(transactionRepository =>
+            transactionRepository.Create(It.IsAny<Transaction>(), CancellationToken.None));
 
         // ACT
         var transactionId = await _accountService
-            .MakeTransaction(positiveAmount, accountFromId, accountToId, CancellationToken.None);
+            .MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
 
         // ASSERT
-        Assert.NotEqual(Guid.Empty, transactionId);
+        _transactionRepositoryMock.Verify(transactionRepository =>
+            transactionRepository.Create(It.Is<Transaction>(transaction =>
+                Math.Abs(transaction.Amount - expectedAmount) < 0.001 &&
+                transaction.Currency == expectedCurrency &&
+                Math.Abs(transaction.Commission - expectedCommission) < 0.001 &&
+                transaction.FromAccountId == accountFromId &&
+                transaction.ToAccountId == accountToId &&
+                transaction.Id != Guid.Empty &&
+                transactionId == transaction.Id), It.IsAny<CancellationToken>()));
     }
 
     [Theory]

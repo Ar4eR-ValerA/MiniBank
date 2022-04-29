@@ -35,48 +35,87 @@ public class UserServerTests
     [Fact]
     public async void GetById_SuccessPath_UserReturned()
     {
+        var expectedId = Guid.NewGuid();
+        var expectedLogin = "Login";
+        var expectedEmail = "Email";
+
         // ARRANGE
-        var expectedUser = new User();
+        var returnedUser = new User
+        {
+            Id = expectedId,
+            Login = expectedLogin,
+            Email = expectedEmail
+        };
 
         _userRepositoryMock
-            .Setup(userRepository => userRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
-            .ReturnsAsync(expectedUser);
+            .Setup(userRepository =>
+                userRepository.GetById(It.Is<Guid>(id => id == expectedId), CancellationToken.None))
+            .ReturnsAsync(returnedUser);
 
         // ACT
-        var user = await _userService.GetById(Guid.NewGuid(), CancellationToken.None);
+        var user = await _userService.GetById(expectedId, CancellationToken.None);
 
         // ASSERT
-        Assert.Equal(expectedUser, user);
+        Assert.Equal(returnedUser, user);
+        Assert.Equal(expectedId, user.Id);
+        Assert.Equal(expectedLogin, user.Login);
+        Assert.Equal(expectedEmail, user.Email);
     }
 
     [Fact]
     public async void GetAll_SuccessPath_UsersReturned()
     {
         // ARRANGE
-        IReadOnlyList<User> expectedUsers = new List<User>();
+        var expectedId = Guid.NewGuid();
+        var expectedLogin = "Login";
+        var expectedEmail = "Email";
+
+        IReadOnlyList<User> returnedUsers = new List<User>
+        {
+            new()
+            {
+                Id = expectedId,
+                Login = expectedLogin,
+                Email = expectedEmail
+            }
+        };
 
         _userRepositoryMock
             .Setup(userRepository => userRepository.GetAll(CancellationToken.None))
-            .ReturnsAsync(expectedUsers);
+            .ReturnsAsync(returnedUsers);
 
         // ACT
         var users = await _userService.GetAll(CancellationToken.None);
 
         // ASSERT
-        Assert.Equal(expectedUsers, users);
+        Assert.Equal(returnedUsers, users);
+        Assert.Equal(returnedUsers.Count, users.Count);
+        Assert.Equal(expectedId, users[0].Id);
+        Assert.Equal(expectedLogin, users[0].Login);
+        Assert.Equal(expectedEmail, users[0].Email);
     }
 
     [Fact]
     public async void Create_SuccessPath_ReturnUserId()
     {
         // ARRANGE
-        var user = new User();
+        var expectedLogin = "Login";
+        var expectedEmail = "Email";
+
+        var user = new User
+        {
+            Login = expectedLogin,
+            Email = expectedEmail
+        };
 
         // ACT
         var userId = await _userService.Create(user, CancellationToken.None);
 
         // ASSERT
         Assert.NotEqual(Guid.Empty, userId);
+        Assert.NotEqual(Guid.Empty, user.Id);
+        Assert.Equal(expectedLogin, user.Login);
+        Assert.Equal(expectedEmail, user.Email);
     }
 
     [Fact]
@@ -108,6 +147,7 @@ public class UserServerTests
 
         // ACT, ASSERT
         await _userService.Update(user, CancellationToken.None);
+        // TODO: Проверить UnitOfWork
     }
 
     [Fact]
@@ -125,6 +165,7 @@ public class UserServerTests
         {
             await _userService.Update(user, CancellationToken.None);
         });
+        // TODO: Проверить UnitOfWork
     }
 
     [Fact]
