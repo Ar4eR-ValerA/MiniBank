@@ -15,12 +15,14 @@ public class UserValidatorTests
         _validator = new UserValidator();
     }
 
-    [Theory]
-    [InlineData("TestLogin", "TestEmail")]
-    public void Validate_SuccessPath_NotThrow(string login, string email)
+    [Fact]
+    public void Validate_SuccessPath_NotThrow()
     {
         // ARRANGE
-        var user = new User { Login = login, Email = email, Id = Guid.NewGuid() };
+        const string testLogin = "TestLogin";
+        const string testEmail = "TestEmail";
+
+        var user = new User { Login = testLogin, Email = testEmail, Id = Guid.NewGuid() };
 
         // ACT, ASSERT
         _validator.ValidateAndThrow(user);
@@ -36,12 +38,13 @@ public class UserValidatorTests
         Assert.Throws<ValidationException>(() => _validator.ValidateAndThrow(user));
     }
 
-    [Theory]
-    [InlineData("string with length greater than 20")]
-    public void Validate_Over20LengthLogin_ThrowValidationException(string login)
+    [Fact]
+    public void Validate_Over20LengthLogin_ThrowValidationException()
     {
         // ARRANGE
-        var user = new User { Login = login };
+        const string longString = "string with length greater than 20";
+
+        var user = new User { Login = longString };
 
         // ACT, ASSERT
         Assert.Throws<ValidationException>(() => _validator.ValidateAndThrow(user));

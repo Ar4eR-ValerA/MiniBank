@@ -140,12 +140,13 @@ public class AccountServiceTests
         });
     }
 
-    [Theory]
-    [InlineData(100)]
-    public async void Close_NotZeroBalance_ThrowUserFriendlyException(double balance)
+    [Fact]
+    public async void Close_NotZeroBalance_ThrowUserFriendlyException()
     {
         // ARRANGE
-        var returnedAccount = new Account { IsActive = true, Balance = balance };
+        const double positiveBalance = 100;
+
+        var returnedAccount = new Account { IsActive = true, Balance = positiveBalance };
 
         _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
@@ -158,11 +159,12 @@ public class AccountServiceTests
         });
     }
 
-    [Theory]
-    [InlineData(100)]
-    public async void CalculateCommission_SuccessPathDifferentUsers_NotZeroCommission(double amount)
+    [Fact]
+    public async void CalculateCommission_SuccessPathDifferentUsers_NotZeroCommission()
     {
         // ARRANGE
+        const double positiveAmount = 100;
+
         var userFromId = Guid.NewGuid();
         var userToId = Guid.NewGuid();
 
@@ -185,31 +187,32 @@ public class AccountServiceTests
                 Id = returnedAccountToId,
                 UserId = userToId
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(positiveAmount));
 
         // ACT
         var commission = await _accountService.CalculateCommission(
-            amount,
+            positiveAmount,
             returnedAccountFromId,
             returnedAccountToId,
             CancellationToken.None);
-        
+
         // ASSERT
         Assert.NotEqual(0, commission);
     }
 
-    [Theory]
-    [InlineData(100)]
-    public async void CalculateCommission_SuccessPathSameUser_ZeroCommission(double amount)
+    [Fact]
+    public async void CalculateCommission_SuccessPathSameUser_ZeroCommission()
     {
         // ARRANGE
+        const double positiveAmount = 100;
+
         var userId = Guid.NewGuid();
 
         var returnedAccountFromId = Guid.NewGuid();
@@ -231,22 +234,22 @@ public class AccountServiceTests
                 Id = returnedAccountToId,
                 UserId = userId
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(positiveAmount));
 
         // ACT
         var commission = await _accountService.CalculateCommission(
-            amount,
+            positiveAmount,
             returnedAccountFromId,
             returnedAccountToId,
             CancellationToken.None);
-        
+
         // ASSERT
         Assert.Equal(0, commission);
     }
@@ -254,7 +257,7 @@ public class AccountServiceTests
     [Theory]
     [InlineData(-10)]
     [InlineData(0)]
-    public async void CalculateCommission_InvalidAmount_ThrowUserFriendlyException(double amount)
+    public async void CalculateCommission_InvalidAmount_ThrowUserFriendlyException(double notPositiveAmount)
     {
         // ARRANGE
         var returnedAccountFromId = Guid.NewGuid();
@@ -276,31 +279,32 @@ public class AccountServiceTests
                 Id = returnedAccountToId,
                 UserId = Guid.NewGuid()
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(notPositiveAmount));
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
             await _accountService.CalculateCommission(
-                amount,
+                notPositiveAmount,
                 returnedAccountFromId,
                 returnedAccountToId,
                 CancellationToken.None);
         });
     }
 
-    [Theory]
-    [InlineData(100)]
-    public async void MakeTransaction_SuccessPath_TransactionMade(double amount)
+    [Fact]
+    public async void MakeTransaction_SuccessPath_TransactionMade()
     {
         // ARRANGE
+        const double positiveAmount = 100;
+
         var accountToId = Guid.NewGuid();
         var accountFromId = Guid.NewGuid();
 
@@ -312,7 +316,7 @@ public class AccountServiceTests
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
-                Balance = amount
+                Balance = positiveAmount
             }));
         _accountRepositoryMock
             .Setup(accountRepository =>
@@ -323,18 +327,18 @@ public class AccountServiceTests
                 IsActive = true,
                 UserId = Guid.NewGuid()
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(positiveAmount));
 
         // ACT
         var transactionId = await _accountService
-            .MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+            .MakeTransaction(positiveAmount, accountFromId, accountToId, CancellationToken.None);
 
         // ASSERT
         Assert.NotEqual(Guid.Empty, transactionId);
@@ -343,7 +347,7 @@ public class AccountServiceTests
     [Theory]
     [InlineData(-20)]
     [InlineData(0)]
-    public async void MakeTransaction_InvalidAmount_ThrowUserFriendlyException(double amount)
+    public async void MakeTransaction_InvalidAmount_ThrowUserFriendlyException(double notPositiveAmount)
     {
         // ARRANGE
         var accountFromId = Guid.NewGuid();
@@ -357,7 +361,7 @@ public class AccountServiceTests
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
-                Balance = amount
+                Balance = notPositiveAmount
             }));
         _accountRepositoryMock
             .Setup(accountRepository =>
@@ -368,27 +372,29 @@ public class AccountServiceTests
                 IsActive = true,
                 UserId = Guid.NewGuid(),
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(notPositiveAmount));
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+            await _accountService.MakeTransaction(notPositiveAmount, accountFromId, accountToId,
+                CancellationToken.None);
         });
     }
 
-    [Theory]
-    [InlineData(100)]
-    public async void MakeTransaction_SameAccount_ThrowUserFriendlyException(double amount)
+    [Fact]
+    public async void MakeTransaction_SameAccount_ThrowUserFriendlyException()
     {
         // ARRANGE
+        const double positiveAmount = 100;
+
         var userId = Guid.NewGuid();
         var accountId = Guid.NewGuid();
 
@@ -400,29 +406,30 @@ public class AccountServiceTests
                 Id = accountId,
                 UserId = userId,
                 IsActive = true,
-                Balance = amount
+                Balance = positiveAmount
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(positiveAmount));
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            await _accountService.MakeTransaction(amount, accountId, accountId, CancellationToken.None);
+            await _accountService.MakeTransaction(positiveAmount, accountId, accountId, CancellationToken.None);
         });
     }
 
-    [Theory]
-    [InlineData(100)]
-    public async void MakeTransaction_SenderIsNotActive_ThrowUserFriendlyException(double amount)
+    [Fact]
+    public async void MakeTransaction_SenderIsNotActive_ThrowUserFriendlyException()
     {
         // ARRANGE
+        const double positiveAmount = 100;
+
         var accountFromId = Guid.NewGuid();
         var accountToId = Guid.NewGuid();
 
@@ -434,7 +441,7 @@ public class AccountServiceTests
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = false,
-                Balance = amount
+                Balance = positiveAmount
             }));
         _accountRepositoryMock
             .Setup(accountRepository =>
@@ -445,27 +452,29 @@ public class AccountServiceTests
                 IsActive = true,
                 UserId = Guid.NewGuid(),
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(positiveAmount));
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+            await _accountService.MakeTransaction(positiveAmount, accountFromId, accountToId,
+                CancellationToken.None);
         });
     }
 
-    [Theory]
-    [InlineData(100)]
-    public async void MakeTransaction_ReceiverIsNotActive_ThrowUserFriendlyException(double amount)
+    [Fact]
+    public async void MakeTransaction_ReceiverIsNotActive_ThrowUserFriendlyException()
     {
         // ARRANGE
+        const double positiveAmount = 100;
+
         var accountFromId = Guid.NewGuid();
         var accountToId = Guid.NewGuid();
 
@@ -477,7 +486,7 @@ public class AccountServiceTests
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
-                Balance = amount
+                Balance = positiveAmount
             }));
         _accountRepositoryMock
             .Setup(accountRepository =>
@@ -488,29 +497,30 @@ public class AccountServiceTests
                 IsActive = false,
                 UserId = Guid.NewGuid(),
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(positiveAmount));
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+            await _accountService.MakeTransaction(positiveAmount, accountFromId, accountToId,
+                CancellationToken.None);
         });
     }
 
-    [Theory]
-    [InlineData(100, 20)]
-    public async void MakeTransaction_NegativeBalanceAfterTransaction_ThrowUserFriendlyException(
-        double amount,
-        double balanceFrom)
+    [Fact]
+    public async void MakeTransaction_NegativeBalanceAfterTransaction_ThrowUserFriendlyException()
     {
         // ARRANGE
+        const double positiveAmount = 100;
+        const double positiveBalanceFrom = 20;
+
         var accountFromId = Guid.NewGuid();
         var accountToId = Guid.NewGuid();
 
@@ -522,7 +532,7 @@ public class AccountServiceTests
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
-                Balance = balanceFrom
+                Balance = positiveBalanceFrom
             }));
         _accountRepositoryMock
             .Setup(accountRepository =>
@@ -533,19 +543,20 @@ public class AccountServiceTests
                 IsActive = false,
                 UserId = Guid.NewGuid(),
             }));
-        
+
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
                 currencyRateConversionService.ConvertCurrencyRate(
-                    It.IsAny<double>(), 
+                    It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(amount));
+            .Returns(Task.FromResult(positiveAmount));
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
         {
-            await _accountService.MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+            await _accountService.MakeTransaction(positiveAmount, accountFromId, accountToId,
+                CancellationToken.None);
         });
     }
 }

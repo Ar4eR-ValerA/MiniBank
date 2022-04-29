@@ -38,7 +38,7 @@ public class UserServerTests
     {
         // ARRANGE
         var expectedUser = new User();
-        
+
         _userRepositoryMock
             .Setup(userRepository => userRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(expectedUser));
@@ -55,7 +55,7 @@ public class UserServerTests
     {
         // ARRANGE
         IReadOnlyList<User> expectedUsers = new List<User>();
-        
+
         _userRepositoryMock
             .Setup(userRepository => userRepository.GetAll(CancellationToken.None))
             .Returns(Task.FromResult(expectedUsers));
@@ -72,7 +72,7 @@ public class UserServerTests
     {
         // ARRANGE
         var user = new User();
-        
+
         // ACT
         var userId = await _userService.Create(user, CancellationToken.None);
 
@@ -85,7 +85,7 @@ public class UserServerTests
     {
         // ARRANGE
         var user = new User();
-        
+
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsLoginExists(It.IsAny<string>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
@@ -102,7 +102,7 @@ public class UserServerTests
     {
         // ARRANGE
         var user = new User();
-        
+
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(true));
@@ -116,7 +116,7 @@ public class UserServerTests
     {
         // ARRANGE
         var user = new User();
-        
+
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .Returns(Task.FromResult(false));
