@@ -417,14 +417,14 @@ public class AccountServiceTests
     }
 
     [Theory]
-    [InlineData(100, 100)]
+    [InlineData(100, 102)]
     [InlineData(20, 100)]
     public async void MakeTransaction_SuccessPath_TransactionMade(double positiveAmount, double positiveBalanceFrom)
     {
         // ARRANGE
         var expectedCurrency = Currency.EUR;
         var expectedCommission = Math.Round(positiveAmount * 0.02, 2);
-        var expectedAmount = positiveAmount - expectedCommission;
+        var expectedAmount = positiveAmount;
 
         var accountToId = Guid.NewGuid();
         var accountFromId = Guid.NewGuid();
@@ -479,11 +479,15 @@ public class AccountServiceTests
 
         _accountRepositoryMock.Verify(accountRepository =>
             accountRepository.Update(It.Is<Account>(account =>
-                accountFromId == account.Id), It.IsAny<CancellationToken>()), Times.Once);
+                    accountFromId == account.Id &&
+                    Math.Abs(positiveBalanceFrom - positiveAmount - expectedCommission - account.Balance) < 0.001),
+                It.IsAny<CancellationToken>()), Times.Once);
 
         _accountRepositoryMock.Verify(accountRepository =>
             accountRepository.Update(It.Is<Account>(account =>
-                accountToId == account.Id), It.IsAny<CancellationToken>()), Times.Once);
+                    accountToId == account.Id &&
+                    Math.Abs(positiveAmount - account.Balance) < 0.001),
+                It.IsAny<CancellationToken>()), Times.Once);
 
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
     }

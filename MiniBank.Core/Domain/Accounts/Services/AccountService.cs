@@ -158,15 +158,14 @@ public class AccountService : IAccountService
         var toAccount = await _accountRepository.GetById(toAccountId, cancellationToken);
 
         double commission = CalculateCommission(amount, fromAccount, toAccount);
-        double transactionAmount = amount - commission;
         double convertedTransactionAmount = await _currencyRateConversionService.ConvertCurrencyRate(
-            transactionAmount,
+            amount,
             fromAccount.Currency,
             toAccount.Currency);
 
-        ValidateTransactionAndThrow(amount, fromAccount, toAccount);
+        ValidateTransactionAndThrow(amount + commission, fromAccount, toAccount);
 
-        fromAccount.Balance -= amount;
+        fromAccount.Balance -= amount + commission;
         toAccount.Balance += convertedTransactionAmount;
 
         await _accountRepository.Update(fromAccount, cancellationToken);
@@ -176,7 +175,7 @@ public class AccountService : IAccountService
         var transaction = new Transaction
         {
             Id = transactionId,
-            Amount = transactionAmount,
+            Amount = amount,
             Commission = commission,
             Currency = fromAccount.Currency,
             FromAccountId = fromAccountId,
