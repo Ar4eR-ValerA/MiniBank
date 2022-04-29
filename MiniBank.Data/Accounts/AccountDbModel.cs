@@ -13,19 +13,12 @@ public class AccountDbModel
     public bool IsActive { get; set; }
     public DateTime DateOpened { get; set; }
     public DateTime? DateClosed { get; set; }
+}
 
-    internal class Map : IEntityTypeConfiguration<AccountDbModel>
+internal class Map : IEntityTypeConfiguration<AccountDbModel>
+{
+    public void Configure(EntityTypeBuilder<AccountDbModel> builder)
     {
-        public void Configure(EntityTypeBuilder<AccountDbModel> builder)
-        {
-            builder.ToTable("account");
-            builder.Property(a => a.Id).HasColumnName("id");
-            builder.Property(a => a.UserId).HasColumnName("user_id");
-            builder.Property(a => a.Balance).HasColumnName("balance");
-            builder.Property(a => a.Currency).HasColumnName("currency");
-            builder.Property(a => a.IsActive).HasColumnName("is_active");
-            builder.Property(a => a.DateOpened).HasColumnName("date_opened");
-            builder.Property(a => a.DateClosed).HasColumnName("date_closed");
-        }
+        builder.ToTable("account");
     }
 }

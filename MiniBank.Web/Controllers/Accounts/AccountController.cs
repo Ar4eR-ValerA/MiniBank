@@ -51,7 +51,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<Guid> Create(AccountCreateDto accountCreateDto, CancellationToken cancellationToken = default)
+    public Task<Guid> Create(AccountCreateDto accountCreateDto, CancellationToken cancellationToken = default)
     {
         var account = new Account
         {
@@ -60,32 +60,32 @@ public class AccountController : ControllerBase
             Currency = accountCreateDto.Currency
         };
 
-        return await _accountService.Create(account, cancellationToken);
+        return _accountService.Create(account, cancellationToken);
     }
 
     [HttpPut("close/{id:guid}")]
-    public async Task Close(Guid id, CancellationToken cancellationToken = default)
+    public Task Close(Guid id, CancellationToken cancellationToken = default)
     {
-        await _accountService.Close(id, cancellationToken);
+        return _accountService.Close(id, cancellationToken);
     }
 
     [HttpGet("calculate-commission")]
-    public async Task<double> CalculateCommission(
+    public Task<double> CalculateCommission(
         double amount,
         Guid fromAccountId,
         Guid toAccountId,
         CancellationToken cancellationToken = default)
     {
-        return await _accountService.CalculateCommission(amount, fromAccountId, toAccountId, cancellationToken);
+        return _accountService.CalculateCommission(amount, fromAccountId, toAccountId, cancellationToken);
     }
 
     [HttpPost("make-transaction")]
-    public async Task<Guid> MakeTransaction(
+    public Task<Guid> MakeTransaction(
         double amount,
         Guid fromAccountId,
         Guid toAccountId,
         CancellationToken cancellationToken = default)
     {
-        return await _accountService.MakeTransaction(amount, fromAccountId, toAccountId, cancellationToken);
+        return _accountService.MakeTransaction(amount, fromAccountId, toAccountId, cancellationToken);
     }
 }

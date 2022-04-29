@@ -29,7 +29,7 @@ public static class Bootstraps
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddDbContext<MiniBankContext>(options =>
         {
-            options.UseNpgsql("Host=localhost;Port=5432;Database=MiniBankDB;Username=postgres;Password=123456");
+            options.UseNpgsql(configuration["Database"]);
         });
 
         return services;

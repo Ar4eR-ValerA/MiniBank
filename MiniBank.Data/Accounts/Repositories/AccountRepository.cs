@@ -103,10 +103,7 @@ public class AccountRepository : IAccountRepository
 
     public async Task<bool> HasUserLinkedAccounts(Guid usedId, CancellationToken cancellationToken)
     {
-        var accountDbModel = await _context.Accounts
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.UserId == usedId, cancellationToken);
-
-        return accountDbModel is not null;
+        return await _context.Accounts
+            .AnyAsync(a => a.UserId == usedId, cancellationToken);
     }
 }

@@ -23,7 +23,7 @@ namespace MiniBank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_account", x => x.id);
+                    table.PrimaryKey("pk_account", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -39,7 +39,7 @@ namespace MiniBank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_transaction", x => x.id);
+                    table.PrimaryKey("pk_transaction", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -48,11 +48,11 @@ namespace MiniBank.Data.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     login = table.Column<string>(type: "text", nullable: true),
-                    Email = table.Column<string>(type: "text", nullable: true)
+                    email = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_user", x => x.id);
+                    table.PrimaryKey("pk_user", x => x.id);
                 });
         }
 

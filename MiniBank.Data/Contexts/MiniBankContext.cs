@@ -26,6 +26,7 @@ public class MiniBankContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseLazyLoadingProxies();
+        optionsBuilder.UseSnakeCaseNamingConvention();
         optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
         base.OnConfiguring(optionsBuilder);
     }

@@ -26,7 +26,7 @@ namespace MiniBank.Data.CurrencyRates.Providers
         private async Task<double> GetCurrencyRubleRate(Currency currencyCode)
         {
             CurrenciesModel response = await _client
-                .GetFromJsonAsync<CurrenciesModel>("");
+                .GetFromJsonAsync<CurrenciesModel>("/daily_json.js");
 
             if (response is null)
             {

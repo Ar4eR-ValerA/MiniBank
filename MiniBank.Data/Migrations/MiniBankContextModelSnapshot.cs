@@ -53,7 +53,8 @@ namespace MiniBank.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_account");
 
                     b.ToTable("account", (string)null);
                 });
@@ -85,7 +86,8 @@ namespace MiniBank.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("to_account_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_transaction");
 
                     b.ToTable("transaction", (string)null);
                 });
@@ -99,13 +101,14 @@ namespace MiniBank.Data.Migrations
 
                     b.Property<string>("Email")
                         .HasColumnType("text")
-                        .HasColumnName("Email");
+                        .HasColumnName("email");
 
                     b.Property<string>("Login")
                         .HasColumnType("text")
                         .HasColumnName("login");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_user");
 
                     b.ToTable("user", (string)null);
                 });

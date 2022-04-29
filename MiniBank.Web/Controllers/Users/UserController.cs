@@ -43,7 +43,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<Guid> Create(UserCreateDto userCreateDto, CancellationToken cancellationToken = default)
+    public Task<Guid> Create(UserCreateDto userCreateDto, CancellationToken cancellationToken = default)
     {
         var user = new User
         {
@@ -51,11 +51,11 @@ public class UserController : ControllerBase
             Email = userCreateDto.Email
         };
 
-        return await _userService.Create(user, cancellationToken);
+        return _userService.Create(user, cancellationToken);
     }
 
     [HttpPut("update/{id:guid}")]
-    public async Task Update(Guid id, UserUpdateDto userUpdateDto, CancellationToken cancellationToken = default)
+    public Task Update(Guid id, UserUpdateDto userUpdateDto, CancellationToken cancellationToken = default)
     {
         var user = new User
         {
@@ -64,12 +64,12 @@ public class UserController : ControllerBase
             Email = userUpdateDto.Email
         };
 
-        await _userService.Update(user, cancellationToken);
+        return _userService.Update(user, cancellationToken);
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task Delete(Guid id, CancellationToken cancellationToken = default)
+    public Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
-        await _userService.Delete(id, cancellationToken);
+        return _userService.Delete(id, cancellationToken);
     }
 }
