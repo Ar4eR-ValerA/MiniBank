@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniBank.Data", "MiniBank.D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D8900DDF-817D-4262-B3B9-7E8C1B34CD60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniBank.Core.Tests", "MiniBank.Core.Tests\MiniBank.Core.Tests.csproj", "{343254DE-708F-4AF9-A184-060D38916008}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniBank.Core.Tests", "Tests\MiniBank.Core.Tests\MiniBank.Core.Tests.csproj", "{BEB82A48-1B00-4B86-9846-3922FC497694}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,12 +28,12 @@ Global
 		{4653B765-17D3-4755-8363-748276B57C88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4653B765-17D3-4755-8363-748276B57C88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4653B765-17D3-4755-8363-748276B57C88}.Release|Any CPU.Build.0 = Release|Any CPU
-		{343254DE-708F-4AF9-A184-060D38916008}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{343254DE-708F-4AF9-A184-060D38916008}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{343254DE-708F-4AF9-A184-060D38916008}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{343254DE-708F-4AF9-A184-060D38916008}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEB82A48-1B00-4B86-9846-3922FC497694}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEB82A48-1B00-4B86-9846-3922FC497694}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEB82A48-1B00-4B86-9846-3922FC497694}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEB82A48-1B00-4B86-9846-3922FC497694}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{343254DE-708F-4AF9-A184-060D38916008} = {D8900DDF-817D-4262-B3B9-7E8C1B34CD60}
+		{BEB82A48-1B00-4B86-9846-3922FC497694} = {D8900DDF-817D-4262-B3B9-7E8C1B34CD60}
 	EndGlobalSection
 EndGlobal
