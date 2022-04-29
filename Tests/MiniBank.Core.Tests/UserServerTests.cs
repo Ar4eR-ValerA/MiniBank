@@ -17,19 +17,20 @@ public class UserServerTests
     private readonly IUserService _userService;
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IAccountRepository> _accountRepositoryMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public UserServerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
         _accountRepositoryMock = new Mock<IAccountRepository>();
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
         var userValidatorMock = new Mock<IValidator<User>>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         _userService = new UserService(
             _userRepositoryMock.Object,
             _accountRepositoryMock.Object,
             userValidatorMock.Object,
-            unitOfWorkMock.Object);
+            _unitOfWorkMock.Object);
     }
 
     [Fact]
@@ -96,26 +97,35 @@ public class UserServerTests
     }
 
     [Fact]
-    public async void Create_SuccessPath_ReturnUserId()
+    public async void Create_SuccessPath_Created()
     {
         // ARRANGE
         var expectedLogin = "Login";
         var expectedEmail = "Email";
 
-        var user = new User
+        var expectedUser = new User
         {
             Login = expectedLogin,
             Email = expectedEmail
         };
 
         // ACT
-        var userId = await _userService.Create(user, CancellationToken.None);
+        var userId = await _userService.Create(expectedUser, CancellationToken.None);
 
         // ASSERT
         Assert.NotEqual(Guid.Empty, userId);
-        Assert.NotEqual(Guid.Empty, user.Id);
-        Assert.Equal(expectedLogin, user.Login);
-        Assert.Equal(expectedEmail, user.Email);
+        Assert.NotEqual(Guid.Empty, expectedUser.Id);
+        Assert.Equal(expectedLogin, expectedUser.Login);
+        Assert.Equal(expectedEmail, expectedUser.Email);
+
+        _userRepositoryMock.Verify(userRepository =>
+            userRepository.Create(It.Is<User>(user =>
+                    user == expectedUser &&
+                    user.Id != Guid.Empty &&
+                    user.Login == expectedLogin &&
+                    user.Email == expectedEmail),
+                It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -136,18 +146,37 @@ public class UserServerTests
     }
 
     [Fact]
-    public async void Update_SuccessPath_NotThrow()
+    public async void Update_SuccessPath_Updated()
     {
         // ARRANGE
-        var user = new User();
+        var expectedId = Guid.NewGuid();
+        var expectedLogin = "Login";
+        var expectedEmail = "Email";
+
+
+        var expectedUser = new User
+        {
+            Id = expectedId,
+            Login = expectedLogin,
+            Email = expectedEmail
+        };
 
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
             .ReturnsAsync(true);
 
-        // ACT, ASSERT
-        await _userService.Update(user, CancellationToken.None);
-        // TODO: Проверить UnitOfWork
+        // ACT
+        await _userService.Update(expectedUser, CancellationToken.None);
+
+        // ASSERT
+        _userRepositoryMock.Verify(userRepository =>
+            userRepository.Update(It.Is<User>(user =>
+                    user == expectedUser &&
+                    user.Id == expectedId &&
+                    user.Login == expectedLogin &&
+                    user.Email == expectedEmail),
+                It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -165,24 +194,32 @@ public class UserServerTests
         {
             await _userService.Update(user, CancellationToken.None);
         });
-        // TODO: Проверить UnitOfWork
     }
 
     [Fact]
-    public async void Delete_SuccessPath_NotThrow()
+    public async void Delete_SuccessPath_Deleted()
     {
         // ARRANGE
+        var expectedId = Guid.NewGuid();
+
         _userRepositoryMock
-            .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
+            .Setup(userRepository =>
+                userRepository.IsExist(It.Is<Guid>(id => id == expectedId), CancellationToken.None))
             .ReturnsAsync(true);
 
         _accountRepositoryMock
             .Setup(accountRepository =>
-                accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
+                accountRepository.HasUserLinkedAccounts(It.Is<Guid>(id => id == expectedId), CancellationToken.None))
             .ReturnsAsync(false);
 
-        // ACT, ASSERT
-        await _userService.Delete(Guid.NewGuid(), CancellationToken.None);
+        // ACT
+        await _userService.Delete(expectedId, CancellationToken.None);
+
+        // ASSERT
+        _userRepositoryMock.Verify(userRepository =>
+            userRepository.Delete(It.Is<Guid>(id =>
+                id == expectedId), It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]

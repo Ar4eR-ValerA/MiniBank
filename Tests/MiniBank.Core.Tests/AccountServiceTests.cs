@@ -21,6 +21,7 @@ public class AccountServiceTests
     private readonly IAccountService _accountService;
     private readonly Mock<IAccountRepository> _accountRepositoryMock;
     private readonly Mock<ICurrencyRateConversionService> _currencyRateConversionServiceMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ITransactionRepository> _transactionRepositoryMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
 
@@ -29,16 +30,16 @@ public class AccountServiceTests
         _accountRepositoryMock = new Mock<IAccountRepository>();
         _transactionRepositoryMock = new Mock<ITransactionRepository>();
         _currencyRateConversionServiceMock = new Mock<ICurrencyRateConversionService>();
-        var accountValidatorMock = new Mock<IValidator<Account>>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
         _userRepositoryMock = new Mock<IUserRepository>();
+        var accountValidatorMock = new Mock<IValidator<Account>>();
 
         _accountService = new AccountService(
             _accountRepositoryMock.Object,
             _currencyRateConversionServiceMock.Object,
             _transactionRepositoryMock.Object,
             accountValidatorMock.Object,
-            unitOfWorkMock.Object,
+            _unitOfWorkMock.Object,
             _userRepositoryMock.Object);
     }
 
@@ -128,7 +129,7 @@ public class AccountServiceTests
     }
 
     [Fact]
-    public async void Create_SuccessPath_CorrectAccountCreated()
+    public async void Create_SuccessPath_Created()
     {
         // ARRANGE
         var expectedUserId = Guid.NewGuid();
@@ -160,6 +161,16 @@ public class AccountServiceTests
         Assert.Equal(expectedCurrency, returnedAccount.Currency);
         Assert.Equal(expectedIsActive, returnedAccount.IsActive);
         Assert.Equal(expectedDateClosed, returnedAccount.DateClosed);
+
+        _accountRepositoryMock.Verify(accountRepository =>
+            accountRepository.Create(It.Is<Account>(account =>
+                expectedUserId == account.UserId &&
+                expectedDateOpened == account.DateOpened.Date &&
+                Math.Abs(expectedBalance - account.Balance) < 0.001 &&
+                expectedCurrency == account.Currency &&
+                expectedIsActive == account.IsActive &&
+                expectedDateClosed == account.DateClosed), It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -179,7 +190,7 @@ public class AccountServiceTests
     }
 
     [Fact]
-    public async void Close_SuccessPath_AccountClosed()
+    public async void Close_SuccessPath_Closed()
     {
         // ARRANGE
         var expectedId = Guid.NewGuid();
@@ -205,7 +216,7 @@ public class AccountServiceTests
             .ReturnsAsync(returnedAccount);
 
         // ACT
-        await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
+        await _accountService.Close(expectedId, CancellationToken.None);
 
         // ASSERT
         Assert.Equal(expectedId, returnedAccount.Id);
@@ -215,6 +226,18 @@ public class AccountServiceTests
         Assert.Equal(expectedCurrency, returnedAccount.Currency);
         Assert.Equal(expectedIsActive, returnedAccount.IsActive);
         Assert.Equal(expectedDateClosed, returnedAccount.DateClosed?.Date);
+
+        _accountRepositoryMock.Verify(accountRepository =>
+            accountRepository.Update(It.Is<Account>(account =>
+                expectedId == account.Id &&
+                expectedUserId == account.UserId &&
+                expectedDateOpened == account.DateOpened.Date &&
+                Math.Abs(expectedBalance - account.Balance) < 0.001 &&
+                expectedCurrency == account.Currency &&
+                expectedIsActive == account.IsActive &&
+                account.DateClosed != null &&
+                expectedDateClosed == account.DateClosed.Value.Date), It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -452,7 +475,17 @@ public class AccountServiceTests
                 transaction.FromAccountId == accountFromId &&
                 transaction.ToAccountId == accountToId &&
                 transaction.Id != Guid.Empty &&
-                transactionId == transaction.Id), It.IsAny<CancellationToken>()));
+                transactionId == transaction.Id), It.IsAny<CancellationToken>()), Times.Once);
+
+        _accountRepositoryMock.Verify(accountRepository =>
+            accountRepository.Update(It.Is<Account>(account =>
+                accountFromId == account.Id), It.IsAny<CancellationToken>()), Times.Once);
+
+        _accountRepositoryMock.Verify(accountRepository =>
+            accountRepository.Update(It.Is<Account>(account =>
+                accountToId == account.Id), It.IsAny<CancellationToken>()), Times.Once);
+
+        _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
     }
 
     [Theory]
@@ -629,7 +662,7 @@ public class AccountServiceTests
     [InlineData(100, 20)]
     [InlineData(100, 100)]
     public async void MakeTransaction_NegativeBalanceAfterTransaction_ThrowUserFriendlyException(
-        double positiveAmount, 
+        double positiveAmount,
         double positiveBalanceFrom)
     {
         // ARRANGE
