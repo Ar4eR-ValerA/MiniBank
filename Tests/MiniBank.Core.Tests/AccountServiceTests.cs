@@ -275,11 +275,12 @@ public class AccountServiceTests
         });
     }
 
-    [Fact]
-    public async void CalculateCommission_SuccessPathDifferentUsers_NotZeroCommission()
+    [Theory]
+    [InlineData(100)]
+    [InlineData(1)]
+    public async void CalculateCommission_SuccessPathDifferentUsers_NotZeroCommission(double positiveAmount)
     {
         // ARRANGE
-        double positiveAmount = 100;
         var expectedCommission = Math.Round(positiveAmount * 0.02, 2);
 
         var userFromId = Guid.NewGuid();
@@ -324,12 +325,12 @@ public class AccountServiceTests
         Assert.Equal(expectedCommission, commission);
     }
 
-    [Fact]
-    public async void CalculateCommission_SuccessPathSameUser_ZeroCommission()
+    [Theory]
+    [InlineData(100)]
+    [InlineData(1)]
+    public async void CalculateCommission_SuccessPathSameUser_ZeroCommission(double positiveAmount)
     {
         // ARRANGE
-        double positiveAmount = 100;
-
         var userId = Guid.NewGuid();
 
         var returnedAccountFromId = Guid.NewGuid();
@@ -424,32 +425,49 @@ public class AccountServiceTests
         // ARRANGE
         var expectedCurrency = Currency.EUR;
         var expectedCommission = Math.Round(positiveAmount * 0.02, 2);
-        var expectedAmount = positiveAmount;
+
+        var accountFromId = Guid.NewGuid();
+        var accountFromUserId = Guid.NewGuid();
+        var accountFromDateOpened = DateTime.UtcNow.Date;
+        var accountFromBalance = positiveBalanceFrom;
+        var accountFromIsActive = true;
+        DateTime? accountFromDateClosed = null;
+        var accountFrom = new Account
+        {
+            Id = accountFromId,
+            UserId = accountFromUserId,
+            DateOpened = accountFromDateOpened,
+            Balance = accountFromBalance,
+            Currency = expectedCurrency,
+            IsActive = accountFromIsActive,
+            DateClosed = accountFromDateClosed
+        };
 
         var accountToId = Guid.NewGuid();
-        var accountFromId = Guid.NewGuid();
+        var accountToUserId = Guid.NewGuid();
+        var accountToDateOpened = DateTime.UtcNow.Date;
+        var accountToBalance = 0;
+        var accountToIsActive = true;
+        DateTime? accountToDateClosed = null;
+        var accountTo = new Account
+        {
+            Id = accountToId,
+            UserId = accountToUserId,
+            DateOpened = accountToDateOpened,
+            Balance = accountToBalance,
+            Currency = expectedCurrency,
+            IsActive = accountToIsActive,
+            DateClosed = accountToDateClosed
+        };
 
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
-            .ReturnsAsync(new Account
-            {
-                Id = accountFromId,
-                UserId = Guid.NewGuid(),
-                IsActive = true,
-                Currency = expectedCurrency,
-                Balance = positiveBalanceFrom
-            });
+            .ReturnsAsync(accountFrom);
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
-            .ReturnsAsync(new Account
-            {
-                Id = accountToId,
-                IsActive = true,
-                Currency = expectedCurrency,
-                UserId = Guid.NewGuid()
-            });
+            .ReturnsAsync(accountTo);
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -469,25 +487,37 @@ public class AccountServiceTests
         // ASSERT
         _transactionRepositoryMock.Verify(transactionRepository =>
             transactionRepository.Create(It.Is<Transaction>(transaction =>
-                Math.Abs(transaction.Amount - expectedAmount) < 0.001 &&
+                Math.Abs(transaction.Amount - positiveAmount) < 0.001 &&
                 transaction.Currency == expectedCurrency &&
                 Math.Abs(transaction.Commission - expectedCommission) < 0.001 &&
                 transaction.FromAccountId == accountFromId &&
                 transaction.ToAccountId == accountToId &&
                 transaction.Id != Guid.Empty &&
                 transactionId == transaction.Id), It.IsAny<CancellationToken>()), Times.Once);
-
+        
         _accountRepositoryMock.Verify(accountRepository =>
-            accountRepository.Update(It.Is<Account>(account =>
+                accountRepository.Update(It.Is<Account>(account =>
                     accountFromId == account.Id &&
-                    Math.Abs(positiveBalanceFrom - positiveAmount - expectedCommission - account.Balance) < 0.001),
-                It.IsAny<CancellationToken>()), Times.Once);
+                    accountFromUserId == account.UserId &&
+                    accountFromDateOpened == account.DateOpened &&
+                    Math.Abs(accountFromBalance - positiveAmount - expectedCommission - account.Balance) < 0.001 &&
+                    expectedCurrency == account.Currency &&
+                    accountFromIsActive == account.IsActive &&
+                    accountFromDateClosed == null &&
+                    account.DateClosed == null), It.IsAny<CancellationToken>()),
+            Times.Once);
 
         _accountRepositoryMock.Verify(accountRepository =>
-            accountRepository.Update(It.Is<Account>(account =>
+                accountRepository.Update(It.Is<Account>(account =>
                     accountToId == account.Id &&
-                    Math.Abs(positiveAmount - account.Balance) < 0.001),
-                It.IsAny<CancellationToken>()), Times.Once);
+                    accountToUserId == account.UserId &&
+                    accountToDateOpened == account.DateOpened &&
+                    Math.Abs(positiveAmount - account.Balance) < 0.001 &&
+                    expectedCurrency == account.Currency &&
+                    accountToIsActive == account.IsActive &&
+                    accountToDateClosed == null &&
+                    account.DateClosed == null), It.IsAny<CancellationToken>()),
+            Times.Once);
 
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
     }
