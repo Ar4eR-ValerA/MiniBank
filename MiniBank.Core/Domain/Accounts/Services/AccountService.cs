@@ -164,7 +164,7 @@ public class AccountService : IAccountService
             fromAccount.Currency,
             toAccount.Currency);
 
-        ValidateTransactionAndThrow(transactionAmount, fromAccount, toAccount);
+        ValidateTransactionAndThrow(amount, fromAccount, toAccount);
 
         fromAccount.Balance -= amount;
         toAccount.Balance += convertedTransactionAmount;

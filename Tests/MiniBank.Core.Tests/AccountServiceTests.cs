@@ -70,7 +70,7 @@ public class AccountServiceTests
             .ReturnsAsync(returnedAccount);
 
         // ACT
-        var account = await _accountService.GetById(Guid.NewGuid(), CancellationToken.None);
+        var account = await _accountService.GetById(expectedId, CancellationToken.None);
 
         // ASSERT
         Assert.Equal(returnedAccount, account);
@@ -393,14 +393,15 @@ public class AccountServiceTests
         });
     }
 
-    [Fact]
-    public async void MakeTransaction_SuccessPath_TransactionMade()
+    [Theory]
+    [InlineData(100, 100)]
+    [InlineData(20, 100)]
+    public async void MakeTransaction_SuccessPath_TransactionMade(double positiveAmount, double positiveBalanceFrom)
     {
         // ARRANGE
-        var amount = 100;
         var expectedCurrency = Currency.EUR;
-        var expectedCommission = Math.Round(amount * 0.02, 2);
-        var expectedAmount = amount - expectedCommission;
+        var expectedCommission = Math.Round(positiveAmount * 0.02, 2);
+        var expectedAmount = positiveAmount - expectedCommission;
 
         var accountToId = Guid.NewGuid();
         var accountFromId = Guid.NewGuid();
@@ -414,7 +415,7 @@ public class AccountServiceTests
                 UserId = Guid.NewGuid(),
                 IsActive = true,
                 Currency = expectedCurrency,
-                Balance = amount
+                Balance = positiveBalanceFrom
             });
         _accountRepositoryMock
             .Setup(accountRepository =>
@@ -433,14 +434,14 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .ReturnsAsync(amount);
+            .ReturnsAsync(positiveAmount);
 
         _transactionRepositoryMock.Setup(transactionRepository =>
             transactionRepository.Create(It.IsAny<Transaction>(), CancellationToken.None));
 
         // ACT
         var transactionId = await _accountService
-            .MakeTransaction(amount, accountFromId, accountToId, CancellationToken.None);
+            .MakeTransaction(positiveAmount, accountFromId, accountToId, CancellationToken.None);
 
         // ASSERT
         _transactionRepositoryMock.Verify(transactionRepository =>
@@ -624,13 +625,14 @@ public class AccountServiceTests
         });
     }
 
-    [Fact]
-    public async void MakeTransaction_NegativeBalanceAfterTransaction_ThrowUserFriendlyException()
+    [Theory]
+    [InlineData(100, 20)]
+    [InlineData(100, 100)]
+    public async void MakeTransaction_NegativeBalanceAfterTransaction_ThrowUserFriendlyException(
+        double positiveAmount, 
+        double positiveBalanceFrom)
     {
         // ARRANGE
-        const double positiveAmount = 100;
-        const double positiveBalanceFrom = 20;
-
         var accountFromId = Guid.NewGuid();
         var accountToId = Guid.NewGuid();
 
