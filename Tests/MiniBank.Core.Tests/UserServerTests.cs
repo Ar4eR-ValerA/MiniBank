@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using FluentValidation;
 using MiniBank.Core.Domain.Accounts.Repositories;
 using MiniBank.Core.Domain.Users;
@@ -41,7 +40,7 @@ public class UserServerTests
 
         _userRepositoryMock
             .Setup(userRepository => userRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(expectedUser));
+            .ReturnsAsync(expectedUser);
 
         // ACT
         var user = await _userService.GetById(Guid.NewGuid(), CancellationToken.None);
@@ -58,7 +57,7 @@ public class UserServerTests
 
         _userRepositoryMock
             .Setup(userRepository => userRepository.GetAll(CancellationToken.None))
-            .Returns(Task.FromResult(expectedUsers));
+            .ReturnsAsync(expectedUsers);
 
         // ACT
         var users = await _userService.GetAll(CancellationToken.None);
@@ -88,7 +87,7 @@ public class UserServerTests
 
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsLoginExists(It.IsAny<string>(), CancellationToken.None))
-            .Returns(Task.FromResult(true));
+            .ReturnsAsync(true);
 
         // ACT, ASSERT
         Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -105,7 +104,7 @@ public class UserServerTests
 
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(true));
+            .ReturnsAsync(true);
 
         // ACT, ASSERT
         await _userService.Update(user, CancellationToken.None);
@@ -119,7 +118,7 @@ public class UserServerTests
 
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(false));
+            .ReturnsAsync(false);
 
         // ACT, ASSERT
         Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -134,12 +133,12 @@ public class UserServerTests
         // ARRANGE
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(true));
+            .ReturnsAsync(true);
 
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(false));
+            .ReturnsAsync(false);
 
         // ACT, ASSERT
         await _userService.Delete(Guid.NewGuid(), CancellationToken.None);
@@ -151,7 +150,7 @@ public class UserServerTests
         // ARRANGE
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(false));
+            .ReturnsAsync(false);
 
         // ACT, ASSERT
         Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -166,11 +165,11 @@ public class UserServerTests
         // ARRANGE
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(true));
+            .ReturnsAsync(true);
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.HasUserLinkedAccounts(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(true));
+            .ReturnsAsync(true);
 
         // ACT, ASSERT
         Assert.ThrowsAsync<UserFriendlyException>(async () =>

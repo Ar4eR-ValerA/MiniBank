@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using FluentValidation;
 using MiniBank.Core.Domain.Accounts;
 using MiniBank.Core.Domain.Accounts.Repositories;
@@ -48,7 +47,7 @@ public class AccountServiceTests
         var expectedAccount = new Account();
         _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(expectedAccount));
+            .ReturnsAsync(expectedAccount);
 
         // ACT
         var account = await _accountService.GetById(Guid.NewGuid(), CancellationToken.None);
@@ -64,7 +63,7 @@ public class AccountServiceTests
         IReadOnlyList<Account> expectedAccounts = new List<Account>();
         _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetAll(CancellationToken.None))
-            .Returns(Task.FromResult(expectedAccounts));
+            .ReturnsAsync(expectedAccounts);
 
         // ACT
         var accounts = await _accountService.GetAll(CancellationToken.None);
@@ -80,7 +79,7 @@ public class AccountServiceTests
         var account = new Account();
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(true));
+            .ReturnsAsync(true);
 
         // ACT
         var accountId = await _accountService.Create(account, CancellationToken.None);
@@ -98,7 +97,7 @@ public class AccountServiceTests
         var account = new Account();
         _userRepositoryMock
             .Setup(userRepository => userRepository.IsExist(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(false));
+            .ReturnsAsync(false);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -114,7 +113,7 @@ public class AccountServiceTests
         var returnedAccount = new Account { IsActive = true, Balance = 0 };
         _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(returnedAccount));
+            .ReturnsAsync(returnedAccount);
 
         // ACT
         await _accountService.Close(Guid.NewGuid(), CancellationToken.None);
@@ -131,7 +130,7 @@ public class AccountServiceTests
         var returnedAccount = new Account { IsActive = false };
         _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(returnedAccount));
+            .ReturnsAsync(returnedAccount);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -150,7 +149,7 @@ public class AccountServiceTests
 
         _accountRepositoryMock
             .Setup(accountRepository => accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(returnedAccount));
+            .ReturnsAsync(returnedAccount);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -174,19 +173,19 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = returnedAccountFromId,
                 UserId = userFromId
-            }));
+            });
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = returnedAccountToId,
                 UserId = userToId
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -194,7 +193,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(positiveAmount));
+            .ReturnsAsync(positiveAmount);
 
         // ACT
         var commission = await _accountService.CalculateCommission(
@@ -221,19 +220,19 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = returnedAccountFromId,
                 UserId = userId
-            }));
+            });
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = returnedAccountToId,
                 UserId = userId
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -241,7 +240,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(positiveAmount));
+            .ReturnsAsync(positiveAmount);
 
         // ACT
         var commission = await _accountService.CalculateCommission(
@@ -266,19 +265,19 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = returnedAccountFromId,
                 UserId = Guid.NewGuid()
-            }));
+            });
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == returnedAccountToId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = returnedAccountToId,
                 UserId = Guid.NewGuid()
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -286,7 +285,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(notPositiveAmount));
+            .ReturnsAsync(notPositiveAmount);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -311,22 +310,22 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
                 Balance = positiveAmount
-            }));
+            });
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountToId,
                 IsActive = true,
                 UserId = Guid.NewGuid()
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -334,7 +333,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(positiveAmount));
+            .ReturnsAsync(positiveAmount);
 
         // ACT
         var transactionId = await _accountService
@@ -356,22 +355,22 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
                 Balance = notPositiveAmount
-            }));
+            });
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountToId,
                 IsActive = true,
                 UserId = Guid.NewGuid(),
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -379,7 +378,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(notPositiveAmount));
+            .ReturnsAsync(notPositiveAmount);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -401,13 +400,13 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.IsAny<Guid>(), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountId,
                 UserId = userId,
                 IsActive = true,
                 Balance = positiveAmount
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -415,7 +414,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(positiveAmount));
+            .ReturnsAsync(positiveAmount);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -436,22 +435,22 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = false,
                 Balance = positiveAmount
-            }));
+            });
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountToId,
                 IsActive = true,
                 UserId = Guid.NewGuid(),
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -459,7 +458,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(positiveAmount));
+            .ReturnsAsync(positiveAmount);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -481,22 +480,22 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
                 Balance = positiveAmount
-            }));
+            });
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountToId,
                 IsActive = false,
                 UserId = Guid.NewGuid(),
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -504,7 +503,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(positiveAmount));
+            .ReturnsAsync(positiveAmount);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -527,22 +526,22 @@ public class AccountServiceTests
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountFromId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountFromId,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
                 Balance = positiveBalanceFrom
-            }));
+            });
         _accountRepositoryMock
             .Setup(accountRepository =>
                 accountRepository.GetById(It.Is<Guid>(id => id == accountToId), CancellationToken.None))
-            .Returns(Task.FromResult(new Account
+            .ReturnsAsync(new Account
             {
                 Id = accountToId,
                 IsActive = false,
                 UserId = Guid.NewGuid(),
-            }));
+            });
 
         _currencyRateConversionServiceMock
             .Setup(currencyRateConversionService =>
@@ -550,7 +549,7 @@ public class AccountServiceTests
                     It.IsAny<double>(),
                     It.IsAny<Currency>(),
                     It.IsAny<Currency>()))
-            .Returns(Task.FromResult(positiveAmount));
+            .ReturnsAsync(positiveAmount);
 
         // ACT, ASSERT
         await Assert.ThrowsAsync<UserFriendlyException>(async () =>
