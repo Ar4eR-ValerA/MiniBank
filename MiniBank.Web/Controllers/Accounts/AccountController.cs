@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MiniBank.Core.Domain.Accounts;
 using MiniBank.Core.Domain.Accounts.Services;
 using MiniBank.Web.Controllers.Accounts.Dto;
@@ -16,6 +17,7 @@ public class AccountController : ControllerBase
         _accountService = accountService;
     }
 
+    [Authorize]
     [HttpGet("{id:guid}")]
     public async Task<AccountDto> GetById(Guid id, CancellationToken cancellationToken = default)
     {
@@ -33,6 +35,7 @@ public class AccountController : ControllerBase
         };
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IReadOnlyList<AccountDto>> GetAll(CancellationToken cancellationToken = default)
     {
@@ -50,6 +53,7 @@ public class AccountController : ControllerBase
         }).ToList();
     }
 
+    [Authorize]
     [HttpPost("create")]
     public Task<Guid> Create(AccountCreateDto accountCreateDto, CancellationToken cancellationToken = default)
     {
@@ -63,12 +67,14 @@ public class AccountController : ControllerBase
         return _accountService.Create(account, cancellationToken);
     }
 
+    [Authorize]
     [HttpPut("close/{id:guid}")]
     public Task Close(Guid id, CancellationToken cancellationToken = default)
     {
         return _accountService.Close(id, cancellationToken);
     }
 
+    [Authorize]
     [HttpGet("calculate-commission")]
     public Task<double> CalculateCommission(
         double amount,
@@ -79,6 +85,7 @@ public class AccountController : ControllerBase
         return _accountService.CalculateCommission(amount, fromAccountId, toAccountId, cancellationToken);
     }
 
+    [Authorize]
     [HttpPost("make-transaction")]
     public Task<Guid> MakeTransaction(
         double amount,

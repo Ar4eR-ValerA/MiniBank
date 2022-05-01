@@ -1,4 +1,8 @@
 ﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Extensions;
+using Microsoft.OpenApi.Models;
 using MiniBank.Core;
 using MiniBank.Data;
 using MiniBank.Web.HostedServices;
@@ -12,7 +16,7 @@ namespace MiniBank.Web
         {
             Configuration = configuration;
         }
-        
+
         public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
@@ -25,7 +29,50 @@ namespace MiniBank.Web
                 });
 
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            
+            services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition(Configuration["AuthenticationSchemeName"], new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        ClientCredentials = new OpenApiOAuthFlow
+                        {
+                            TokenUrl = new Uri(Configuration["TokenUrl"]),
+                            Scopes = new Dictionary<string, string>()
+                        }
+                    }
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = SecuritySchemeType.OAuth2.GetDisplayName()
+                            }
+                        },
+                        new List<string>()
+                    }
+                });
+            });
+
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.Audience = Configuration["Audience"];
+                    options.Authority = Configuration["Authority"];
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateLifetime = true,
+                        ValidateAudience = false
+                    };
+                });
 
             services.AddHostedService<MigrationHostedService>();
 
@@ -36,18 +83,20 @@ namespace MiniBank.Web
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseRouting();
-
-            app.UseMiddleware<ExceptionMiddleware>();
-
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
+            app.UseRouting();
+            
+            app.UseAuthentication();
             app.UseAuthorization();
+            
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }

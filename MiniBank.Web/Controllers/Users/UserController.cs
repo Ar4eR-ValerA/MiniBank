@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MiniBank.Core.Domain.Users;
 using MiniBank.Core.Domain.Users.Services;
 using MiniBank.Web.Controllers.Users.Dto;
@@ -16,6 +17,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
+    [Authorize]
     [HttpGet("{id:guid}")]
     public async Task<UserDto> GetById(Guid id, CancellationToken cancellationToken = default)
     {
@@ -29,6 +31,7 @@ public class UserController : ControllerBase
         };
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IReadOnlyList<UserDto>> GetAll(CancellationToken cancellationToken = default)
     {
@@ -42,6 +45,7 @@ public class UserController : ControllerBase
         }).ToList();
     }
 
+    [Authorize]
     [HttpPost("create")]
     public Task<Guid> Create(UserCreateDto userCreateDto, CancellationToken cancellationToken = default)
     {
@@ -54,6 +58,7 @@ public class UserController : ControllerBase
         return _userService.Create(user, cancellationToken);
     }
 
+    [Authorize]
     [HttpPut("update/{id:guid}")]
     public Task Update(Guid id, UserUpdateDto userUpdateDto, CancellationToken cancellationToken = default)
     {
@@ -67,6 +72,7 @@ public class UserController : ControllerBase
         return _userService.Update(user, cancellationToken);
     }
 
+    [Authorize]
     [HttpDelete("{id:guid}")]
     public Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
