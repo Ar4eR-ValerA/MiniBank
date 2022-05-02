@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using System.Text.Json.Nodes;
+using MiniBank.Web.Middlewares.ValueObjects;
 
 namespace MiniBank.Web.Middlewares;
 
@@ -22,8 +22,8 @@ public class CustomAuthenticationMiddleware
             return;
         }
 
-        var token = authorizationHeader.Split(" ").Last();
-        var expiration = GetExpirationDate(token);
+        var token = new Token(authorizationHeader.Split(" ").Last());
+        var expiration = token.Payload.ExpirationDateTimeUtc;
 
         if (expiration < DateTime.UtcNow)
         {
@@ -36,16 +36,5 @@ public class CustomAuthenticationMiddleware
         }
         
         await _next(httpContext);
-    }
-
-    private DateTime GetExpirationDate(string encodedToken)
-    {
-        var encodedPayload = encodedToken.Split(".")[1];
-        var decodedPayload = Convert.FromBase64String(encodedPayload);
-
-        var payloadJson = JsonNode.Parse(decodedPayload);
-        var expirationUnixTime = (int)payloadJson?["exp"];
-
-        return DateTime.UnixEpoch.AddSeconds(expirationUnixTime);
     }
 }
