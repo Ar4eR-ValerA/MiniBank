@@ -69,8 +69,8 @@ namespace MiniBank.Web
                     options.Authority = Configuration["Authority"];
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateLifetime = true,
-                        ValidateAudience = false
+                        ValidateLifetime = false,
+                        ValidateAudience = false,
                     };
                 });
 
@@ -90,6 +90,7 @@ namespace MiniBank.Web
             }
             
             app.UseMiddleware<ExceptionMiddleware>();
+            app.UseMiddleware<CustomAuthenticationMiddleware>();
 
             app.UseHttpsRedirection();
             app.UseRouting();
