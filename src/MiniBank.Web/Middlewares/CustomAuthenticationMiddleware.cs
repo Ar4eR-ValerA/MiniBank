@@ -27,9 +27,9 @@ public class CustomAuthenticationMiddleware
 
         if (expiration < DateTime.UtcNow)
         {
+            httpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             await httpContext.Response.WriteAsJsonAsync(new
             {
-                StatusCode = HttpStatusCode.Forbidden, 
                 Message = $"Your token has expired on {expiration} UTC"
             });
             return;

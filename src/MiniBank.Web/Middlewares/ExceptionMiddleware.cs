@@ -25,24 +25,23 @@ namespace MiniBank.Web.Middlewares
                     .Select(e => $"{e.ErrorMessage}");
                 var errorsMessage = string.Join(Environment.NewLine, errors);
 
+                httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(new
                 {
-                    StatusCode = HttpStatusCode.BadRequest, errorsMessage
+                    Message = errorsMessage
                 });
             }
             catch (UserFriendlyException exception)
             {
+                httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(new
                 {
-                    StatusCode = HttpStatusCode.BadRequest, exception.Message
+                    Message = exception.Message
                 });
             }
             catch (Exception exception)
             {
-                await httpContext.Response.WriteAsJsonAsync(new
-                {
-                    statusCode = HttpStatusCode.InternalServerError
-                });
+                httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
                 Console.WriteLine(exception.Message);
             }
