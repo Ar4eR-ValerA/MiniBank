@@ -6,8 +6,9 @@ public class Token
 {
     public Token(string token)
     {
-        var encodedPayload = token.Split(".")[1];
-        var decodedPayload = Convert.FromBase64String(encodedPayload);
+        var encodedSections = token.Split(".");
+        
+        var decodedPayload = Convert.FromBase64String(encodedSections[1]);
 
         Payload = JsonSerializer.Deserialize<Payload>(decodedPayload);
     }

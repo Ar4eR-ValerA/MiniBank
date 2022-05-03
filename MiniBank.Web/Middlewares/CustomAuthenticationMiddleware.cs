@@ -23,7 +23,7 @@ public class CustomAuthenticationMiddleware
         }
 
         var token = new Token(authorizationHeader.Split(" ").Last());
-        var expiration = token.Payload.ExpirationDateTimeUtc;
+        var expiration = token.Payload.ExpirationUtc;
 
         if (expiration < DateTime.UtcNow)
         {
